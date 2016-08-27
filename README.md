@@ -2,6 +2,7 @@
 Differential analysis of multiple studies
 
 ## Required packages
+#### \item To install all the required packages, open R console
 ```{r eval=FALSE}
 install.packages("survival","samr","impute","combinat")
 source("http://bioconductor.org/biocLite.R")
