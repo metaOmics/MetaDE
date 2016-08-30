@@ -32,7 +32,9 @@ the first is the survival time and the second is the censoring status.}
 DE analysis, can be a vector of column names or NULL.}
 
 \item{ind.method}{is a character vector to specify the method used to test
-if there is association between the gene expression and outcome variable.}
+if there is association between the gene expression and outcome variable.
+must be one of "limma", "sam" for "continuous" data type and "edgeR",
+"DESeq2" or "limmaVoom" for "discrete" data type.}
 
 \item{asymptotic}{is a logical value indicating whether asymptotic
 distribution should be used. If FALSE, permutation will be performed.}
@@ -71,7 +73,7 @@ for each gene}
 Main Function for Individual Study DE: microarray & RNAseq
 Author: Tianzhou Ma
 Institution: University of pittsburgh
-Date: 08/20/2016
+Date: 08/29/2016
 }
 \details{
 The \code{Indi.DE.Analysis} is a function to perform individual association

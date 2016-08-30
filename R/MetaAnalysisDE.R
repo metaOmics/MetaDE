@@ -1,7 +1,7 @@
 ##' Main Function for Meta analysis: microarray & RNAseq 
 ##' Author: Tianzhou Ma
 ##' Institution: University of pittsburgh
-##' Date: 08/20/2016
+##' Date: 08/29/2016
 
 ##' The \code{MetaDE} is a function to identify genes associated with the 
 ##' response/phenoype of interest (can be either group, continuous or survival)
@@ -25,6 +25,8 @@
 ##' DE analysis, can be a vector of column names or NULL.
 ##' @param ind.method is a character vector to specify the method used to test 
 ##' if there is association between the gene expression and outcome variable.
+##' must be one of "limma", "sam" for "continuous" data type and "edgeR", 
+##' "DESeq2" or "limmaVoom" for "discrete" data type.
 ##' @param meta.method is a character to specify the Meta-analysis method 
 ##' used to combine the p-values, effect sizes or ranks. 
 ##' @param select.group: for two-class comparison only, specify the two groups 
@@ -33,8 +35,6 @@
 ##' reference level of the group factor. 
 ##' @param rth is the option for roP and roP.OC method. rth means the 
 ##' rth smallest p-value.  
-##' @param AW.type is the option for "AW" method only, choose from 
-##' "original", "uncond" or "cond".  
 ##' @param REM.type is the option for "REM" method only, choose from 
 ##' "HS","HO", "DL", "SJ", "EB" or "RML".
 ##' @param paired is a logical vecter of size K to indicate whether the study 
@@ -42,12 +42,12 @@
 ##' @param asymptotic is a logical value indicating whether asymptotic 
 ##' distribution should be used. If FALSE, permutation will be performed. 
 ## 'For resp.type = "continuous", "survival" only.
-##' @param nperm is the number of permutations. Applicable when \code{asymptotic} 
-##' is FALSE.
 ##' @param tail is a character string specifying the alternative hypothesis, 
 ##' must be one of "abs" (default), "low" or "high".
-##' @param asymptotic.p is a logical values indicating whether the parametric 
+##' @param parametric is a logical values indicating whether the parametric 
 ##' methods is chosen to calculate the p-values in meta-analysis.
+##' @param nperm is the number of permutations. Applicable when \code{parametric} 
+##' is FALSE.
 ##' @param seed: Optional initial seed for random number generator.  
 
 ##' @return a list with components: \cr
@@ -78,37 +78,29 @@
 ##' ind.method <- c('limma','limma','sam')
 ##' resp.type <- "twoclass"
 ##' paired <- rep(FALSE,length(data))
-##' meta.method <- "AW"
-##' meta.res <- MetaDE(data=data,clin.data = clin.data,
-##'                     data.type=data.type,resp.type = resp.type,
-##'                     response='label',covariate = NULL,
-##'                     ind.method=ind.method, meta.method=meta.method,
-##'                     select.group = select.group, ref.level=ref.level,
-##'                     paired=paired, rth=NULL,AW.type="original",
-##'                     REM.type=NULL,tail='abs')
 ##' meta.method <- "Fisher"
 ##' meta.res <- MetaDE(data=data,clin.data = clin.data,
 ##'                     data.type=data.type,resp.type = resp.type,
 ##'                     response='label',covariate = NULL,
 ##'                     ind.method=ind.method, meta.method=meta.method,
 ##'                     select.group = select.group, ref.level=ref.level,
-##'                     paired=paired, rth=NULL,AW.type="original",
-##'                     REM.type=NULL,tail='abs')
+##'                     paired=paired, rth=NULL,
+##'                     REM.type=NULL,tail='abs',parametric=TRUE)
 ##' meta.method <- "Fisher.OC"
 ##' meta.res <- MetaDE(data=data,clin.data = clin.data,
 ##'                     data.type=data.type,resp.type = resp.type,
 ##'                     response='label',covariate = NULL,
 ##'                     ind.method=ind.method, meta.method=meta.method,
 ##'                     select.group = select.group, ref.level=ref.level,
-##'                     paired=paired, rth=NULL,AW.type="original",
-##'                     REM.type=NULL,tail='high')
+##'                     paired=paired, rth=NULL,
+##'                     REM.type=NULL,tail='high',parametric=FALSE)
 ##' meta.method <- "FEM"
 ##' meta.res <- MetaDE(data=data,clin.data = clin.data,
 ##'                     data.type=data.type,resp.type = resp.type,
 ##'                     response='label',covariate = NULL,
 ##'                     ind.method=ind.method, meta.method=meta.method,
 ##'                     select.group = select.group, ref.level=ref.level,
-##'                     paired=paired, rth=NULL,AW.type="original",
+##'                     paired=paired, rth=NULL,
 ##'                     REM.type=NULL,tail='abs')
 ##' meta.method <- "REM"
 ##' REM.type <- "HO"
@@ -117,7 +109,7 @@
 ##'                     response='label',covariate = NULL,
 ##'                     ind.method=ind.method, meta.method=meta.method,
 ##'                     select.group = select.group, ref.level=ref.level,
-##'                     paired=paired, rth=NULL,AW.type="original",
+##'                     paired=paired, rth=NULL,
 ##'                     REM.type=REM.type,tail='abs')
 ##' meta.method <- "SR"
 ##' meta.res <- MetaDE(data=data,clin.data = clin.data,
@@ -125,24 +117,32 @@
 ##'                     response='label',covariate = NULL,
 ##'                     ind.method=ind.method, meta.method=meta.method,
 ##'                     select.group = select.group, ref.level=ref.level,
-##'                     paired=paired, rth=NULL,AW.type="original",
-##'                     REM.type=NULL,tail='abs')
+##'                     paired=paired, rth=NULL,
+##'                     REM.type=NULL,tail='abs',parametric=FALSE)
 ##' meta.method <- 'minMCC'
 ##' meta.res <- MetaDE(data=data,clin.data = clin.data,
 ##'                     data.type=data.type,resp.type = resp.type,
 ##'                     response='label',covariate = NULL,
 ##'                     ind.method=ind.method, meta.method=meta.method,
 ##'                     select.group = select.group, ref.level=ref.level,
-##'                     paired=paired, rth=NULL,AW.type="original",
-##'                     REM.type=NULL,tail='abs')
+##'                     paired=paired, rth=NULL,
+##'                     REM.type=NULL,tail='abs',parametric=FALSE)
+##' meta.method <- "AW"
+##' meta.res <- MetaDE(data=data,clin.data = clin.data,
+##'                     data.type=data.type,resp.type = resp.type,
+##'                     response='label',covariate = NULL,
+##'                     ind.method=ind.method, meta.method=meta.method,
+##'                     select.group = select.group, ref.level=ref.level,
+##'                     paired=paired, rth=NULL,
+##'                     REM.type=NULL,tail='abs',parametric=TRUE)
 
 
 MetaDE<-function(data, clin.data, data.type, resp.type, 
                  response,covariate,ind.method, meta.method, 
                  select.group , ref.level, paired=NULL,
-                 rth, AW.type, REM.type,
-                 asymptotic=FALSE, nperm=100, tail='abs',
-                 asymptotic.p=FALSE, seed=12345,...) {
+                 rth, REM.type,
+                 asymptotic=FALSE, tail='abs',
+                 parametric=TRUE, nperm=100, seed=12345,...) {
 
 ## Call the packages required 
 
@@ -166,14 +166,13 @@ library(combinat)
 ##select.group: specify the two group names for comparison;
 ##ref.level: specify the reference level of the group factor;
 ##rth: rth smallest p-value;
-##AW.type=  c("original","uncond","cond");
 ##REM.type = c("HS","HO", "DL", "SJ", "EB", "RML" );
 ##paired: logical vector of size K indicating whether paired design;
 ##asymptotic: logical whether asymptotic dist should be used for indi part;
-##nperm: number of permutations;
 ##tail = c("low", "high", "abs");
-##asymptotic.p: indicate whether the parametric methods is chosen to 
+##parametric: indicate whether the parametric methods is chosen to 
 ##calculate the p-values in meta-analysis
+##nperm: number of permutations;
 
   K<-length(data) # number of studies
   G<-nrow(data[[1]]) # number of matched genes
@@ -199,7 +198,7 @@ library(combinat)
   check.metamethod(data,response.list,resp.type=resp.type,ind.method,meta.method,
                    rth,REM.type, paired) 
 
-  check.asymptotic(meta.method,asymptotic.p) ##check if asymptotic is ok
+  check.parametric(meta.method, parametric) ##check if parametric is ok
   check.tail(meta.method,tail) ##check the tail 
   data<-check.exp(data)  # check the gene names for expression data
   if(resp.type == "twoclass") {
@@ -266,7 +265,14 @@ library(combinat)
 		attr(res$meta.analysis,"nperlabelperstudy")<- n
 		attr(res$meta.analysis,"data.type")<- data.type
 		attr(res$meta.analysis,"meta.analysis")<- meta.method
-		attr(res$meta.analysis,"response.type")<- resp.type     
+		attr(res$meta.analysis,"response.type")<- resp.type
+        attr(res$meta.analysis,"group.name")<- select.group 
+        attr(res$meta.analysis,"ref.group")<- ref.level
+		if(is.null(names(data))) { 
+		   attr(res$meta.analysis,"dataset.name") <- 
+		          paste("dataset",1:K,sep="") } else {
+		     attr(res$meta.analysis,"dataset.name") <- names(data) 
+			}    
   }  # end of minMCC
   if ("rankProd"%in%meta.method){ #twoclass rank-based
 		K<-length(data)
@@ -303,7 +309,14 @@ library(combinat)
 		 attr(res$meta.analysis,"nperstudy")<- N
 		 attr(res$meta.analysis,"nperlabelperstudy")<- n
 		 attr(res$meta.analysis,"data.type")<- data.type
-		 attr(res$meta.analysis,"response.type")<- resp.type 
+		 attr(res$meta.analysis,"response.type")<- resp.type
+         attr(res$meta.analysis,"group.name")<- select.group 
+         attr(res$meta.analysis,"ref.group")<- ref.level
+		if(is.null(names(data))) { 
+		   attr(res$meta.analysis,"dataset.name") <- 
+		          paste("dataset",1:K,sep="") } else {
+		     attr(res$meta.analysis,"dataset.name") <- names(data) 
+			}      
  } # end of rankPR
   if ("FEM"%in%meta.method|"REM"%in%meta.method){ 
     ## effect size model, two classes allowed only
@@ -331,6 +344,13 @@ library(combinat)
      attr(res$meta.analysis,"nperlabelperstudy")<- n
      attr(res$meta.analysis,"data.type")<- data.type
      attr(res$meta.analysis,"response.type")<- resp.type
+     attr(res$meta.analysis,"group.name")<- select.group 
+     attr(res$meta.analysis,"ref.group")<- ref.level
+		if(is.null(names(data))) { 
+		   attr(res$meta.analysis,"dataset.name") <- 
+		          paste("dataset",1:K,sep="") } else {
+		     attr(res$meta.analysis,"dataset.name") <- names(data) 
+			}  
  } # end of effect size model  
   if(sum(meta.method%in%c("FEM","REM","minMCC","rankProd"))==0)  {
     ## the other p-value combination methods
@@ -342,14 +362,13 @@ library(combinat)
                               ref.level=ref.level,
                               asymptotic = asymptotic, nperm=nperm,
                               tail=tail, seed=seed)
-   if (asymptotic.p) {
+   if (parametric) {
     ind.res$bp<-NULL
-    cat("Asymptotic estimation was used instead of the permutation\n")
-   } else cat("Permutation was used instead of the asymptotic estimation\n")
+    cat("Parametric method was used instead of permutation\n")
+   } else cat("Permutation was used instead of the parametric method\n")
     nm<-length(meta.method)
     meta.res<-MetaDE.pvalue(ind.res,meta.method=meta.method,rth=rth,
-                            AW.type=AW.type,
-                            asymptotic=asymptotic.p)$meta.analysis
+                            parametric=parametric)$meta.analysis
     
     raw.data<- full_dat 
     if(resp.type %in% c("twoclass") ){
@@ -371,7 +390,14 @@ library(combinat)
     attr(res$meta.analysis,"nperstudy")<- N
     attr(res$meta.analysis,"nperlabelperstudy")<- n
     attr(res$meta.analysis,"data.type")<- data.type
-    attr(res$meta.analysis,"response.type")<- resp.type 
+    attr(res$meta.analysis,"response.type")<- resp.type
+    attr(res$meta.analysis,"group.name")<- select.group 
+    attr(res$meta.analysis,"ref.group")<- ref.level
+		if(is.null(names(data))) { 
+		   attr(res$meta.analysis,"dataset.name") <- 
+		          paste("dataset",1:K,sep="") } else {
+		     attr(res$meta.analysis,"dataset.name") <- names(data) 
+	      }   
   } ## end of p-value combination methods
 
 #  if("minMCC"%in%meta.method){
@@ -413,11 +439,11 @@ MetaDE.minMCC<-function(x,nperm=100)
    return(res)
 }
    
-MetaDE.pvalue <-function(x,meta.method,rth,AW.type,asymptotic) {
+MetaDE.pvalue <-function(x,meta.method,rth,parametric) {
   #meta.method<-match.arg(meta.method,several.ok = TRUE)
-  check.asymptotic(meta.method,asymptotic)
+  check.parametric(meta.method,parametric)
   K<-ncol(x$p)
-  if (asymptotic) x$bp<-NULL     
+  if (parametric) x$bp<-NULL     
     nm<-length(meta.method)
     meta.res<-list(stat=NA,pval=NA,FDR=NA,AW.weight=NA)
     meta.res$stat<-meta.res$pval<-meta.res$FDR<-matrix(NA,nrow(x$p),nm)
@@ -425,7 +451,7 @@ MetaDE.pvalue <-function(x,meta.method,rth,AW.type,asymptotic) {
     temp<-switch(meta.method[i],
                  maxP={get.maxP(x$p,x$bp)},minP={get.minP(x$p,x$bp)},
                  Fisher={get.fisher(x$p,x$bp)},roP={get.roP(x$p,x$bp,rth=rth)},
-                 AW={get.AW(x$p,AW.type)},
+                 AW={get.AW(x$p)},
                  Fisher.OC={get.fisher.OC(x$p,x$bp)},
                  maxP.OC={get.maxP.OC(x$p,x$bp)},
                  minP.OC={get.minP.OC(x$p,x$bp)},
@@ -726,7 +752,7 @@ get.Stouff.OC<-function(p,bp=NULL){
 
 ########## new version AW-fisher ###############
 
-get.AW <- function(p.values, AW.type, bp=NULL, logInput = FALSE, 
+get.AW <- function(p.values, AW.type= "original", bp=NULL, logInput = FALSE, 
                    log=FALSE, weight.matrix=TRUE) {
   #gene.names<-rownames(p.values) 
   if(NCOL(p.values) == 1) p.values= t(p.values)
@@ -1147,13 +1173,14 @@ get.tau2 <- function(em, vm, k,  n, REM.type, threshold=10^-5, maxiter = 100) {
   ## em: observed effect size, vm: variance of effect size, n: sample size
   ## k: number of studies
   if (REM.type == "HS") {
-    wt <- n
+    wt <- matrix(rep(n,nrow(em)),byrow=T,nrow=nrow(em),ncol=length(n))
     n_bar <- mean(n)
+    n_sum <- sum(n)
     em_mean <- rowMeans(em)
     num <- rowSums(wt*(em-em_mean)^2)
-    denom <- sum(wt)
-    
-    tau2 <- num/denom  - ((n_bar-1)/(n_bar-3)) * (4/n_bar) * (1+em_mean^2/8)
+    denom <- n_sum
+
+    tau2 <- num/denom  - ((n_sum-1)/(n_sum-3)) * (4/n_bar) * (1+em_mean^2/8)
     res <- list(wt,tau2)
     names(res) <- c('weight','tau2')
     return(res)

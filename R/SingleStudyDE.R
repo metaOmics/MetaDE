@@ -1,7 +1,7 @@
 ##' Main Function for Individual Study DE: microarray & RNAseq 
 ##' Author: Tianzhou Ma
 ##' Institution: University of pittsburgh
-##' Date: 08/20/2016
+##' Date: 08/29/2016
 ##' 
 ##' The \code{Indi.DE.Analysis} is a function to perform individual association
 ##' analysis between gene expression and the response/phenoype of interest (can 
@@ -25,6 +25,8 @@
 ##' DE analysis, can be a vector of column names or NULL.
 ##' @param ind.method is a character vector to specify the method used to test 
 ##' if there is association between the gene expression and outcome variable.
+##' must be one of "limma", "sam" for "continuous" data type and "edgeR", 
+##' "DESeq2" or "limmaVoom" for "discrete" data type.
 ##' @param select.group: for two-class comparison only, specify the two groups 
 ##' for comparison when the group factor has more than two levels.
 ##' @param ref.level: for two-class/multi-class comparison only, specify the 

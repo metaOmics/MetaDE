@@ -5,8 +5,8 @@
 \title{Main Function for Meta DE analysis: microarray & RNAseq.}
 \usage{
 MetaDE(data, clin.data, data.type, resp.type, response, covariate, ind.method,
-  meta.method, select.group, ref.level, paired = NULL, rth, AW.type, REM.type,
-  asymptotic = FALSE, nperm = 100, tail = "abs", asymptotic.p = FALSE,
+  meta.method, select.group, ref.level, paired = NULL, rth, REM.type,
+  asymptotic = FALSE, tail = "abs", parametric = TRUE, nperm = 100,
   seed = 12345, ...)
 }
 \arguments{
@@ -33,7 +33,9 @@ the first is the survival time and the second is the censoring status.}
 DE analysis, can be a vector of column names or NULL.}
 
 \item{ind.method}{is a character vector to specify the method used to test
-if there is association between the gene expression and outcome variable.}
+if there is association between the gene expression and outcome variable.
+must be one of "limma", "sam" for "continuous" data type and "edgeR",
+"DESeq2" or "limmaVoom" for "discrete" data type.}
 
 \item{meta.method}{is a character to specify the Meta-analysis method
 used to combine the p-values, effect sizes or ranks.}
@@ -44,23 +46,20 @@ is paired design?}
 \item{rth}{is the option for roP and roP.OC method. rth means the
 rth smallest p-value.}
 
-\item{AW.type}{is the option for "AW" method only, choose from
-"original", "uncond" or "cond".}
-
 \item{REM.type}{is the option for "REM" method only, choose from
 "HS","HO", "DL", "SJ", "EB" or "RML".}
 
 \item{asymptotic}{is a logical value indicating whether asymptotic
 distribution should be used. If FALSE, permutation will be performed.}
 
-\item{nperm}{is the number of permutations. Applicable when \code{asymptotic}
-is FALSE.}
-
 \item{tail}{is a character string specifying the alternative hypothesis,
 must be one of "abs" (default), "low" or "high".}
 
-\item{asymptotic.p}{is a logical values indicating whether the parametric
+\item{parametric}{is a logical values indicating whether the parametric
 methods is chosen to calculate the p-values in meta-analysis.}
+
+\item{nperm}{is the number of permutations. Applicable when \code{parametric}
+is FALSE.}
 
 \item{select.group:}{for two-class comparison only, specify the two groups
 for comparison when the group factor has more than two levels.}
@@ -86,7 +85,7 @@ each gene if the '\code{AW}' method was chosen.}
 Main Function for Meta analysis: microarray & RNAseq
 Author: Tianzhou Ma
 Institution: University of pittsburgh
-Date: 08/20/2016
+Date: 08/29/2016
 The \code{MetaDE} is a function to identify genes associated with the
 response/phenoype of interest (can be either group, continuous or survival)
 by integrating multiple studies(datasets).
@@ -109,37 +108,29 @@ data.type <- "continuous"
 ind.method <- c('limma','limma','sam')
 resp.type <- "twoclass"
 paired <- rep(FALSE,length(data))
-meta.method <- "AW"
-meta.res <- MetaDE(data=data,clin.data = clin.data,
-                    data.type=data.type,resp.type = resp.type,
-                    response='label',covariate = NULL,
-                    ind.method=ind.method, meta.method=meta.method,
-                    select.group = select.group, ref.level=ref.level,
-                    paired=paired, rth=NULL,AW.type="original",
-                    REM.type=NULL,tail='abs')
 meta.method <- "Fisher"
 meta.res <- MetaDE(data=data,clin.data = clin.data,
                     data.type=data.type,resp.type = resp.type,
                     response='label',covariate = NULL,
                     ind.method=ind.method, meta.method=meta.method,
                     select.group = select.group, ref.level=ref.level,
-                    paired=paired, rth=NULL,AW.type="original",
-                    REM.type=NULL,tail='abs')
+                    paired=paired, rth=NULL,
+                    REM.type=NULL,tail='abs',parametric=TRUE)
 meta.method <- "Fisher.OC"
 meta.res <- MetaDE(data=data,clin.data = clin.data,
                     data.type=data.type,resp.type = resp.type,
                     response='label',covariate = NULL,
                     ind.method=ind.method, meta.method=meta.method,
                     select.group = select.group, ref.level=ref.level,
-                    paired=paired, rth=NULL,AW.type="original",
-                    REM.type=NULL,tail='high')
+                    paired=paired, rth=NULL,
+                    REM.type=NULL,tail='high',parametric=FALSE)
 meta.method <- "FEM"
 meta.res <- MetaDE(data=data,clin.data = clin.data,
                     data.type=data.type,resp.type = resp.type,
                     response='label',covariate = NULL,
                     ind.method=ind.method, meta.method=meta.method,
                     select.group = select.group, ref.level=ref.level,
-                    paired=paired, rth=NULL,AW.type="original",
+                    paired=paired, rth=NULL,
                     REM.type=NULL,tail='abs')
 meta.method <- "REM"
 REM.type <- "HO"
@@ -148,7 +139,7 @@ meta.res <- MetaDE(data=data,clin.data = clin.data,
                     response='label',covariate = NULL,
                     ind.method=ind.method, meta.method=meta.method,
                     select.group = select.group, ref.level=ref.level,
-                    paired=paired, rth=NULL,AW.type="original",
+                    paired=paired, rth=NULL,
                     REM.type=REM.type,tail='abs')
 meta.method <- "SR"
 meta.res <- MetaDE(data=data,clin.data = clin.data,
@@ -156,15 +147,23 @@ meta.res <- MetaDE(data=data,clin.data = clin.data,
                     response='label',covariate = NULL,
                     ind.method=ind.method, meta.method=meta.method,
                     select.group = select.group, ref.level=ref.level,
-                    paired=paired, rth=NULL,AW.type="original",
-                    REM.type=NULL,tail='abs')
+                    paired=paired, rth=NULL,
+                    REM.type=NULL,tail='abs',parametric=FALSE)
 meta.method <- 'minMCC'
 meta.res <- MetaDE(data=data,clin.data = clin.data,
                     data.type=data.type,resp.type = resp.type,
                     response='label',covariate = NULL,
                     ind.method=ind.method, meta.method=meta.method,
                     select.group = select.group, ref.level=ref.level,
-                    paired=paired, rth=NULL,AW.type="original",
-                    REM.type=NULL,tail='abs')
+                    paired=paired, rth=NULL,
+                    REM.type=NULL,tail='abs',parametric=FALSE)
+meta.method <- "AW"
+meta.res <- MetaDE(data=data,clin.data = clin.data,
+                    data.type=data.type,resp.type = resp.type,
+                    response='label',covariate = NULL,
+                    ind.method=ind.method, meta.method=meta.method,
+                    select.group = select.group, ref.level=ref.level,
+                    paired=paired, rth=NULL,
+                    REM.type=NULL,tail='abs',parametric=TRUE)
 }
 

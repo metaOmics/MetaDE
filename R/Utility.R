@@ -1,7 +1,7 @@
 ## Utility functions for plotting and other non stats purposes (Internal)
 ## Author: Tianzhou Ma
 ## Institution: University of pittsburgh
-## Date: 08/10/2016
+## Date: 08/29/2016
 
 #----------------------------------------------# 
 # Matrix manipulation methods 
@@ -63,9 +63,13 @@ plot.matrix<-function(mat,color="GR") {
     n<-attr(mat,"n")
     ni<-attr(mat,"ni")
     label<-attr(mat,"label")
+    dataset.name <- attr(mat,"dataset.name")
+    group.name <- attr(mat,"group.name")
+    ref.group <- attr(mat,"ref.group")
     nc<-ncol(mat)
     nr<-nrow(mat)
-    cexCol<-1/log10(nc)
+    cexCol1<-1/log(nc)
+    cexCol2<-1/log10(nc)
     cexRow<-1/log(nr,4)
     K<-length(n)
     #mycol<- c("#FFFFE5", "#F7FCB9", "#D9F0A3", "#ADDD8E", "#78C679", "#41AB5D", 
@@ -81,11 +85,11 @@ plot.matrix<-function(mat,color="GR") {
     par(mar=c(2,3,2,5))
     image(x=1:nc,y=1:nr,z=t(flip.matrix(mat)),col=mycol,axes=FALSE,xlab = "", 
           ylab = "", breaks=xcut)
-    axis(3,1:nc,labels=label,las=1,line=-0.5,tick=0,cex.axis=cexCol)
+    axis(3,1:nc,labels=label,las=2,line=-0.5,tick=0,cex.axis=cexCol1)
     axis(4,nr:1,labels=(row.names(mat)), las = 2, line = -0.5, tick = 0, 
          cex.axis = cexRow)
-    axis(1,cumsum(n)-n/2+0.5,labels=paste("Dataset",1:K),las=1,line = -1,
-         tick=0,cex.axis=cexCol)
+    axis(1,cumsum(n)-n/2+0.5,labels=dataset.name,las=1,line = -1,
+         tick=0,cex.axis=cexCol2)
     #---distinguish studies----#
     abline(v=cumsum(n)+0.5,lwd=2,col="white")
     #---distinguish classes----#
@@ -93,17 +97,23 @@ plot.matrix<-function(mat,color="GR") {
     #---------if AW method we add category information on the plot---------#
     if (!is.null(attr(mat,'category'))) {
         cat<-attr(mat,'category')
-        at<-cumsum(table(cat))+0.5
+        at.line <-cumsum(table(cat))+0.5
+        sum.pos <- cumsum(table(cat))
+        at <- rep(NA, length(sum.pos))
+        for (i in 2:length(sum.pos)){
+        	at[i] <- sum.pos[i-1] + (sum.pos[i] - sum.pos[i-1])/2 + 0.5
+          }
+        at[1] <- sum.pos[1] + (sum.pos[1] - 0)/2 + 0.5
         axis(2,at-0.5,labels=rev(unique(cat)),tick = 0, las=1,
              cex.axis = cexRow+0.2)
-        abline(h=at,lwd=2,col="white")
+        abline(h=at.line,lwd=2,col="white")
     }
     #----add legend---------------#
     l<-length(xcut)
     image(1:(l-1),0.5,matrix(xcut[-1],nrow=l-1,ncol=1),col=mycol,breaks=xcut,
           axes=F,xlab="",ylab="")
     marcas<-(0:(l-1))+0.5
-    axis(1,marcas,round(xcut,1),tick=0.5,cex.axis=cexCol,line=-0.5)
+    axis(1,marcas,round(xcut,1),tick=0.5,cex.axis=cexCol2,line=-0.5)
 }
 
 #-----------------------------------------------------------#
@@ -188,15 +198,13 @@ check.dim<-function(x,y,ind.method,meta.method,paired){
 }
 
 #-----------------------------------------------------------------------------#
-#   check if asymptotic is ok                                                 #
+#   check if parametric is ok                                                 #
 #-----------------------------------------------------------------------------#
-check.asymptotic<-function(meta.method,asymptotic)
+check.parametric<-function(meta.method,parametric)
 {
-  #if (is.null(nperm)&ind.method%in%c("modt","AW","AW.OC","Fisher.OC","minMCC")) 
-  #stop(paste("There is no asymptotic result for",meta.method))
-  if (asymptotic==TRUE&sum(meta.method%in%c("SR","PR","rankProd",
-                                        "AW","Fisher.OC","minMCC"))>0) {
-    stop(paste("There is no asymptotic result for",meta.method))
+  if (parametric==TRUE&sum(meta.method%in%c("SR","PR","rankProd",
+                                       "Fisher.OC","minMCC"))>0) {
+    stop(paste("There is no parametric result for",meta.method))
   }
 }
 

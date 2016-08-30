@@ -24,7 +24,7 @@ detected by meta analysis across studies/datasets.
 Heatmap of selected DE genes
 Author: Tianzhou Ma
 Institution: University of pittsburgh
-Date: 08/20/2016
+Date: 08/29/2016
 The \code{heatmap.sig.genes} is a function to draw the Heatmap of DE genes
 given a FDR cut point obtained from the Meta-analysis.
 }
@@ -33,7 +33,7 @@ given a FDR cut point obtained from the Meta-analysis.
 meta.method <- 'AW'
 fdr.cut <- 1e-7
 pdf('heatmap.test.pdf')
-heatmap.sig.genes(meta.res.p, meta.method=meta.method,
+heatmap.sig.genes(meta.res, meta.method=meta.method,
                     fdr.cut=fdr.cut,color="GR")
 dev.off()
 }

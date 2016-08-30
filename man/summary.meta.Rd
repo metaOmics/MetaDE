@@ -19,13 +19,13 @@ meta-analysis test statistics, pvalue, FDR, AW weights etc.
 Function to summarize the results in tabular form
 Author: Tianzhou Ma
 Institution: University of pittsburgh
-Date: 08/20/2016
+Date: 08/29/2016
 The \code{summary.meta} is a function to summarize the meta-analysis
 results from the MetaDE output.
 }
 \examples{
-\dontrun{
 meta.method <- 'AW'
+\dontrun{
 summary.result <- summary.meta(result=meta.res,
                               meta.method = meta.method)
 }
