@@ -1,8 +1,4 @@
 ##' Main Function for Meta analysis: microarray & RNAseq 
-##' Author: Tianzhou Ma
-##' Institution: University of pittsburgh
-##' Date: 08/29/2016
-
 ##' The \code{MetaDE} is a function to identify genes associated with the 
 ##' response/phenoype of interest (can be either group, continuous or survival)
 ##' by integrating multiple studies(datasets).
@@ -52,16 +48,15 @@
 
 ##' @return a list with components: \cr
 ##' \itemize{
-##' \item{stat}{a matrix with rows reprenting genes. It is the statistic for 
+##' \item{stat}{ a matrix with rows reprenting genes. It is the statistic for 
 ##' the selected meta analysis method of combining p-values.}
-##' \item{pval}{the p-value from meta analysis for each gene for the above 
+##' \item{pval}{ the p-value from meta analysis for each gene for the above 
 ##' stat.}
-##' \item{FDR}{the FDR of the p-value for each gene for the above stat.}
-##' \item{AW.weight}{The optimal weight assigned to each dataset/study for 
+##' \item{FDR}{ the FDR of the p-value for each gene for the above stat.}
+##' \item{AW.weight}{ The optimal weight assigned to each dataset/study for 
 ##' each gene if the '\code{AW}' method was chosen.}
 ##' }
 
-##' @note multiclass available for limma, samr, edgeR, DESeq2 only; 
 ##' @export
 ##' @examples
 ##' data('Leukemia')
@@ -81,52 +76,47 @@
 ##' meta.method <- "Fisher"
 ##' meta.res <- MetaDE(data=data,clin.data = clin.data,
 ##'                     data.type=data.type,resp.type = resp.type,
-##'                     response='label',covariate = NULL,
+##'                     response='label',
 ##'                     ind.method=ind.method, meta.method=meta.method,
 ##'                     select.group = select.group, ref.level=ref.level,
-##'                     paired=paired, rth=NULL,
-##'                     REM.type=NULL,tail='abs',parametric=TRUE)
+##'                     paired=paired,tail='abs',parametric=TRUE)
 ##' meta.method <- "Fisher.OC"
 ##' meta.res <- MetaDE(data=data,clin.data = clin.data,
 ##'                     data.type=data.type,resp.type = resp.type,
-##'                     response='label',covariate = NULL,
+##'                     response='label',
 ##'                     ind.method=ind.method, meta.method=meta.method,
 ##'                     select.group = select.group, ref.level=ref.level,
-##'                     paired=paired, rth=NULL,
-##'                     REM.type=NULL,tail='high',parametric=FALSE)
+##'                     paired=paired,tail='high',parametric=FALSE,nperm=100)
 ##' meta.method <- "FEM"
 ##' meta.res <- MetaDE(data=data,clin.data = clin.data,
 ##'                     data.type=data.type,resp.type = resp.type,
-##'                     response='label',covariate = NULL,
+##'                     response='label',
 ##'                     ind.method=ind.method, meta.method=meta.method,
 ##'                     select.group = select.group, ref.level=ref.level,
-##'                     paired=paired, rth=NULL,
-##'                     REM.type=NULL,tail='abs')
+##'                     paired=paired, tail='abs')
 ##' meta.method <- "REM"
 ##' REM.type <- "HO"
 ##' meta.res <- MetaDE(data=data,clin.data = clin.data,
 ##'                     data.type=data.type,resp.type = resp.type,
-##'                     response='label',covariate = NULL,
+##'                     response='label',
 ##'                     ind.method=ind.method, meta.method=meta.method,
 ##'                     select.group = select.group, ref.level=ref.level,
-##'                     paired=paired, rth=NULL,
+##'                     paired=paired, 
 ##'                     REM.type=REM.type,tail='abs')
 ##' meta.method <- "SR"
 ##' meta.res <- MetaDE(data=data,clin.data = clin.data,
 ##'                     data.type=data.type,resp.type = resp.type,
-##'                     response='label',covariate = NULL,
+##'                     response='label',
 ##'                     ind.method=ind.method, meta.method=meta.method,
 ##'                     select.group = select.group, ref.level=ref.level,
-##'                     paired=paired, rth=NULL,
-##'                     REM.type=NULL,tail='abs',parametric=FALSE)
+##'                     paired=paired,tail='abs',parametric=FALSE,nperm=100)
 ##' meta.method <- 'minMCC'
 ##' meta.res <- MetaDE(data=data,clin.data = clin.data,
 ##'                     data.type=data.type,resp.type = resp.type,
-##'                     response='label',covariate = NULL,
+##'                     response='label',
 ##'                     ind.method=ind.method, meta.method=meta.method,
 ##'                     select.group = select.group, ref.level=ref.level,
-##'                     paired=paired, rth=NULL,
-##'                     REM.type=NULL,tail='abs',parametric=FALSE)
+##'                     paired=paired,tail='abs',parametric=FALSE,nperm=100)
 ##' meta.method <- "AW"
 ##' meta.res <- MetaDE(data=data,clin.data = clin.data,
 ##'                     data.type=data.type,resp.type = resp.type,
@@ -138,11 +128,11 @@
 
 
 MetaDE<-function(data, clin.data, data.type, resp.type, 
-                 response,covariate,ind.method, meta.method, 
-                 select.group , ref.level, paired=NULL,
-                 rth, REM.type,
-                 asymptotic=FALSE, tail='abs',
-                 parametric=TRUE, nperm=100, seed=12345,...) {
+                 response,covariate=NULL,ind.method, meta.method, 
+                 select.group=NULL , ref.level=NULL, paired=NULL,
+                 rth=NULL, REM.type=NULL,
+                 asymptotic=NULL, tail='abs',
+                 parametric=TRUE, nperm=NULL, seed=12345,...) {
 
 ## Call the packages required 
 
@@ -535,7 +525,7 @@ get.fisher.OC<-function(p,bp=NULL) {
 	 Ug<-matrix(NA,nrow(p),1)
 	 Ug[rnum,1]<-pmax(rowSums(-log(p))[rnum],rowSums(-log(1-p))[rnum])
       if (is.null(bp)) {
-       warning("there're no parametric results for Pearson's method,
+       warning("there're no parametric results for Fisher's OC method,
                   we will use simulation to estimate the p values")
        bp<-matrix(runif(500*nrow(p)*K),500*nrow(p),K) 
       }

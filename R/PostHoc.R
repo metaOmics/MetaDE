@@ -1,8 +1,4 @@
 ##' Post-hoc analysis on AW results
-##' Author: Tianzhou Ma
-##' Institution: University of pittsburgh
-##' Date: 08/29/2016
-
 ##' The \code{posthoc.aw} is a function to perform post-hoc analysis on AW 
 ##' results to determine the overall effect size directionality.
 ##' @title Post-hoc analysis on AW results.

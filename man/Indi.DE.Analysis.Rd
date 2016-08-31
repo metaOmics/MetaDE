@@ -4,9 +4,9 @@
 \alias{Indi.DE.Analysis}
 \title{Main Function for Individual Study DE: microarray & RNAseq.}
 \usage{
-Indi.DE.Analysis(data, clin.data, data.type, resp.type, response, covariate,
-  ind.method, select.group, ref.level, asymptotic = F, nperm = 100,
-  tail = "abs", seed = 12345, ...)
+Indi.DE.Analysis(data, clin.data, data.type, resp.type, response,
+  covariate = NULL, ind.method, select.group = NULL, ref.level = NULL,
+  asymptotic = NULL, nperm = NULL, tail = "abs", seed = 12345, ...)
 }
 \arguments{
 \item{data}{is a list of K elements, where K is the number of studies, each
@@ -57,31 +57,23 @@ must be one of "abs" (default), "low" or "high". For resp.type =
 \value{
 a list with components: \cr
 \itemize{
-\item{p}{For all types of response, the p-value of the association test for
+\item{p}{ For all types of response, the p-value of the association test for
 each gene}
-\item{stat}{For "continuous" and "survival" only, the value of test
+\item{stat}{ For "continuous" and "survival" only, the value of test
 statistic for each ##' gene}
-\item{bp}{For "continuous" and "survival" only, the p-value from
+\item{bp}{ For "continuous" and "survival" only, the p-value from
 	\code{nperm} permutations for each gene. It will be used for the meta
 analysis by default. It can be NULL if you chose asymptotic results. }
-\item{log2FC}{For "twoclass" only, the log2 fold change for each gene}
-\item{lfcSE}{For "twoclass" only, the standard error of log2 fold change
+\item{log2FC}{ For "twoclass" only, the log2 fold change for each gene}
+\item{lfcSE}{ For "twoclass" only, the standard error of log2 fold change
 for each gene}
 }
 }
 \description{
 Main Function for Individual Study DE: microarray & RNAseq
-Author: Tianzhou Ma
-Institution: University of pittsburgh
-Date: 08/29/2016
-}
-\details{
 The \code{Indi.DE.Analysis} is a function to perform individual association
 analysis between gene expression and the response/phenoype of interest (can
 be either group, continuous or survival).
-}
-\note{
-multiclass available for limma, samr, edgeR, DESeq2 only;
 }
 \examples{
 data('Leukemia')
@@ -95,15 +87,25 @@ for (k in 1:length(clin.data)){
 select.group <- c('inv(16)','t(15;17)')
 ref.level <- "inv(16)"
 data.type <- "continuous"
-ind.method <- c('limma','limma','sam')
+ind.method <- c('limma','limma','limma')
 resp.type <- "twoclass"
 ind.res <- Indi.DE.Analysis(data=data,clin.data= clin.data,
                         data.type=data.type,resp.type = resp.type,
-                        response='label',covariate = NULL,
+                        response='label',
                         ind.method=ind.method,select.group = select.group,
                         ref.level=ref.level)
+N <- sapply(data, FUN=function(x) ncol(x))
+survival.time <- lapply(N,FUN = function(x) round(runif(x,10,2000)))
+censor.status <- lapply(N,FUN = function(x) sample(c(0,1),x,replace=TRUE) )
+for (k in 1:length(clin.data)){
+  clin.data[[k]] <- cbind(clin.data[[k]],survival.time[[k]],censor.status[[k]])
+  colnames(clin.data[[k]])[2:3] <- c("survival","censor")
 }
-\author{
-Tianzhou Ma
+ind.method <- c('logrank','logrank','logrank')
+resp.type <- "survival"
+ind.res <- Indi.DE.Analysis(data=data,clin.data= clin.data,
+                         data.type=data.type,resp.type = resp.type,
+                         response=c("survival","censor"),
+                         ind.method=ind.method,asymptotic=TRUE)
 }
 

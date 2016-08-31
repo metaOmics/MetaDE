@@ -1,8 +1,4 @@
 ##' Function to summarize the results in tabular form 
-##' Author: Tianzhou Ma
-##' Institution: University of pittsburgh
-##' Date: 08/29/2016
-
 ##' The \code{summary.meta} is a function to summarize the meta-analysis 
 ##' results from the MetaDE output.
 ##' @title Function to summarize the meta-analysis results.
@@ -13,9 +9,11 @@
 ##' meta-analysis test statistics, pvalue, FDR, AW weights etc.  
 ##' @export
 ##' @examples
-##' meta.method <- 'AW'
 ##' \dontrun{
+##' meta.method <- 'AW'
 ##' summary.result <- summary.meta(result=meta.res, 
+##'                               meta.method = meta.method)
+##' summary.posthoc.result <- summary.meta(result=posthoc.result, 
 ##'                               meta.method = meta.method)
 ##' }
 
@@ -57,9 +55,11 @@ summary.meta <- function(result,meta.method) {
     if (meta.method == "AW") {
       weight <- result$meta.analysis$AW.weight
       colnames(weight) <- paste("weight.study",1:length(result$raw.data),sep="")
-      posthoc.stat <- result$meta.analysis$posthoc[,1]
-      posthoc.dir <- result$meta.analysis$posthoc[,2]
-      summary <- cbind(summary,weight,posthoc.stat,posthoc.dir)
+      if(!is.null(result$meta.analysis$posthoc)) {
+        posthoc.stat <- result$meta.analysis$posthoc[,1]
+        posthoc.dir <- result$meta.analysis$posthoc[,2]
+      	summary <- cbind(summary,weight,posthoc.stat,posthoc.dir)
+       }
     } 
   }
   

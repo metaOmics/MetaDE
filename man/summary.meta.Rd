@@ -17,16 +17,15 @@ meta-analysis test statistics, pvalue, FDR, AW weights etc.
 }
 \description{
 Function to summarize the results in tabular form
-Author: Tianzhou Ma
-Institution: University of pittsburgh
-Date: 08/29/2016
 The \code{summary.meta} is a function to summarize the meta-analysis
 results from the MetaDE output.
 }
 \examples{
-meta.method <- 'AW'
 \dontrun{
+meta.method <- 'AW'
 summary.result <- summary.meta(result=meta.res,
+                              meta.method = meta.method)
+summary.posthoc.result <- summary.meta(result=posthoc.result,
                               meta.method = meta.method)
 }
 }

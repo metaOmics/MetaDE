@@ -85,7 +85,9 @@ plot.matrix<-function(mat,color="GR") {
     par(mar=c(2,3,2,5))
     image(x=1:nc,y=1:nr,z=t(flip.matrix(mat)),col=mycol,axes=FALSE,xlab = "", 
           ylab = "", breaks=xcut)
-    axis(3,1:nc,labels=label,las=2,line=-0.5,tick=0,cex.axis=cexCol1)
+    #axis(3,1:nc,labels=label,las=2,line=-0.5,tick=0,cex.axis=cexCol1)
+    axis(3,cumsum(ni)-ni/2+0.5,labels=rep(group.name,K),las=1,line = -0.5,
+         tick=0,cex.axis=cexCol2)
     axis(4,nr:1,labels=(row.names(mat)), las = 2, line = -0.5, tick = 0, 
          cex.axis = cexRow)
     axis(1,cumsum(n)-n/2+0.5,labels=dataset.name,las=1,line = -1,
@@ -203,7 +205,7 @@ check.dim<-function(x,y,ind.method,meta.method,paired){
 check.parametric<-function(meta.method,parametric)
 {
   if (parametric==TRUE&sum(meta.method%in%c("SR","PR","rankProd",
-                                       "Fisher.OC","minMCC"))>0) {
+                                        "Fisher.OC","minMCC"))>0) {
     stop(paste("There is no parametric result for",meta.method))
   }
 }

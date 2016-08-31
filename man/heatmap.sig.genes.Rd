@@ -22,9 +22,6 @@ detected by meta analysis across studies/datasets.
 }
 \description{
 Heatmap of selected DE genes
-Author: Tianzhou Ma
-Institution: University of pittsburgh
-Date: 08/29/2016
 The \code{heatmap.sig.genes} is a function to draw the Heatmap of DE genes
 given a FDR cut point obtained from the Meta-analysis.
 }
