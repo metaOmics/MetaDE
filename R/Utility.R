@@ -192,7 +192,7 @@ check.dim<-function(x,y,ind.method,meta.method,paired){
 	}
 	if(sum(meta.method%in%c("FEM","REM","minMCC","rankProd"))<1) {
 		if(length(ind.method)!=K)stop(paste('Argument "ind.method" should be 
-                                        a character vecter of size',K))
+                                        a character vector of size',K))
 	}
 	if(("REM"%in%meta.method|"FEM"%in%meta.method)&(length(paired)!=K)) {
     stop(paste('Argument "paired" should be a logical vecter of size',K))

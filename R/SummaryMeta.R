@@ -55,6 +55,7 @@ summary.meta <- function(result,meta.method) {
     if (meta.method == "AW") {
       weight <- result$meta.analysis$AW.weight
       colnames(weight) <- paste("weight.study",1:length(result$raw.data),sep="")
+      summary <- cbind(summary,weight)
       if(!is.null(result$meta.analysis$posthoc)) {
         posthoc.stat <- result$meta.analysis$posthoc[,1]
         posthoc.dir <- result$meta.analysis$posthoc[,2]
