@@ -40,8 +40,15 @@ PathAnalysis <- function (meta.p = NULL,pathway = c(Biocarta.genesets,
                            enrichment = c("KS","Fisher's exact"),
                            p.cut=NULL,DEgene.number = 200,
                            size.min = 15, size.max = 500)
-{	
-  library(MetaPath)
+{ 
+  if(is.vector(meta.p)) {
+  	all.genes <- names(meta.p)
+  	meta.p <- matrix(meta.p)
+  	rownames(meta.p) <- all.genes
+  	colnames(meta.p)[1] <- "pvalue"
+  }	
+  		
+  #library(MetaPath)
   data(pathways)	
   enrichment = match.arg(enrichment)
   pathway = pathway[which(sapply(pathway,length) >= size.min & 
@@ -93,8 +100,12 @@ PathAnalysis <- function (meta.p = NULL,pathway = c(Biocarta.genesets,
       gene.name.sort = toupper(gene.name.sort)
       DEgene = gene.name.sort[1:DEgene.number]
      } else {
+      gene.name.sort = names(sort(meta.p[,1],decreasing = F))
+      genes.in.study = gene.name.sort
+      gene.name.sort = gene.name.sort[gene.name.sort%in%gene.common]
+      gene.name.sort = toupper(gene.name.sort)     	
       gene.select = names(which(meta.p[,1] < p.cut))
-      DEgene = gene.select[gene.select%in%gene.common]
+      DEgene = toupper(gene.select[gene.select%in%gene.common])
      }      
      
     DEset = logOR = OR = pvalue.0 = matrix(NA,nrow = nrow(DB.matrix),ncol = 1)

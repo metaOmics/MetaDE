@@ -508,7 +508,7 @@ get.fisher<-function(p,bp=NULL,miss.tol=0.3) {
 		rnum<-which(apply(p,1,function(x) sum(is.na(x))/k)<miss.tol)
 		pval[rnum]<-apply(p[rnum,],1,function(x) {
       ## calculate Fisher p-value 
-         pchisq(-2*sum(log(x),na.rm=T,lower.tail=FALSE),2*sum(!is.na(x)))
+         pchisq(-2*sum(log(x),na.rm=T),lower.tail=FALSE,2*sum(!is.na(x)) ) 
 		})
 		qval<-p.adjust(pval,method="BH")
 		stat[rnum]<-apply(p[rnum,],1,function(x)-2*sum(log(x),na.rm=T))
