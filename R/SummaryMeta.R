@@ -59,7 +59,7 @@ summary.meta <- function(result,meta.method) {
       if(!is.null(result$meta.analysis$posthoc)) {
         posthoc.stat <- result$meta.analysis$posthoc[,1]
         posthoc.dir <- result$meta.analysis$posthoc[,2]
-      	summary <- cbind(summary,weight,posthoc.stat,posthoc.dir)
+      	summary <- cbind(summary,posthoc.stat,posthoc.dir)
        }
     } 
   }
