@@ -94,11 +94,11 @@ Indi.DE.Analysis <- function(data, clin.data, data.type, resp.type,
 
 ## Call the packages required 
 
-library(survival)
-library(limma)
-library(samr)
-library(edgeR)
-library(DESeq2)
+#library(survival)
+#library(limma)
+#library(samr)
+#library(edgeR)
+#library(DESeq2)
                
 set.seed(seed)
               	
@@ -330,10 +330,19 @@ get.limma<-function(y,l,c,name,ANOVA,tail){
     #stat <- out.table$t
     p <- as.numeric(out.table$P.Value)
     dir <- sign(log2FC)
-    if (tail=="high" && dir == 1 )  pvalue <- pmin(1,p/2)
-    if (tail=="high" && dir == -1 )  pvalue <- pmin(1,1-p/2)
-    if (tail=="low" && dir == 1 )  pvalue <- pmin(1,1-p/2)
-    if (tail=="low" && dir == -1 )  pvalue <- pmin(1,p/2)
+    if (tail=="high") { 
+    	     pvalue <- mapply(function(x,y) if(x==1){
+    	     	                             return(y/2) } else{
+    	     	                             return(1-y/2)	
+    	     	                         }, x=dir, y=p)
+    	 }
+    if (tail=="low") { 
+    	 pvalue <- mapply(function(x,y) if(x==1){
+    	     	                          return(1-y/2) } else{
+    	     	                          return(y/2)	
+    	     	                     }, x=dir, y=p)
+     }    	 
+     
     if (tail=="abs")  pvalue <- p  
     
     #pvalue <-out.table$P.Value
@@ -372,10 +381,19 @@ get.sam<-function(y,l,name, seed, ANOVA, tail) {
     p<- as.numeric(samr.pvalues.from.perms(samr.obj$tt, samr.obj$ttstar))
     log2FC <- as.numeric(log2(samr.obj$foldchange))
     dir <- sign(log2FC)
-    if (tail=="high" && dir == 1 )  pvalue <- pmin(1,p/2)
-    if (tail=="high" && dir == -1 )  pvalue <- pmin(1,1-p/2)
-    if (tail=="low" && dir == 1 )  pvalue <- pmin(1,1-p/2)
-    if (tail=="low" && dir == -1 )  pvalue <- pmin(1,p/2)
+    if (tail=="high") { 
+    	     pvalue <- mapply(function(x,y) if(x==1){
+    	     	                             return(y/2) } else{
+    	     	                             return(1-y/2)	
+    	     	                         }, x=dir, y=p)
+    	 }
+    if (tail=="low") { 
+    	 pvalue <- mapply(function(x,y) if(x==1){
+    	     	                          return(1-y/2) } else{
+    	     	                          return(y/2)	
+    	     	                     }, x=dir, y=p)
+     }    	 
+     
     if (tail=="abs")  pvalue <- p  
     
     sam.out <- list(log2FC,pvalue)
@@ -411,12 +429,20 @@ get.limmaVoom <- function(y,l,c,name, ANOVA, tail) {
   #stat <- out.table$t
     p <- as.numeric(out.table$P.Value)
     dir <- sign(log2FC)
-    if (tail=="high" && dir == 1 )  pvalue <- pmin(1,p/2)
-    if (tail=="high" && dir == -1 )  pvalue <- pmin(1,1-p/2)
-    if (tail=="low" && dir == 1 )  pvalue <- pmin(1,1-p/2)
-    if (tail=="low" && dir == -1 )  pvalue <- pmin(1,p/2)
-    if (tail=="abs")  pvalue <- p    
-    #pvalue <-out.table$P.Value
+    if (tail=="high") { 
+    	  pvalue <- mapply(function(x,y) if(x==1){
+    	     	                             return(y/2) } else{
+    	     	                             return(1-y/2)	
+    	     	                         }, x=dir, y=p)
+    	 }
+    if (tail=="low") { 
+    	 pvalue <- mapply(function(x,y) if(x==1){
+    	     	                          return(1-y/2) } else{
+    	     	                          return(y/2)	
+    	     	                     }, x=dir, y=p)
+     }    	 
+     
+    if (tail=="abs")  pvalue <- p  
   
   limmaVoom.out <- list(log2FC,lfcSE,pvalue)
   names(limmaVoom.out) <- c('log2FC','lfcSE','pvalue')
@@ -461,12 +487,20 @@ get.edgeR <- function(y,l,c,name, ANOVA, tail) {
     
     p <- as.numeric(out.table$PValue)
     dir <- sign(log2FC)
-    if (tail=="high" && dir == 1 )  pvalue <- pmin(1,p/2)
-    if (tail=="high" && dir == -1 )  pvalue <- pmin(1,1-p/2)
-    if (tail=="low" && dir == 1 )  pvalue <- pmin(1,1-p/2)
-    if (tail=="low" && dir == -1 )  pvalue <- pmin(1,p/2)
-    if (tail=="abs")  pvalue <- p    
-    #pvalue <- out.table$PValue
+    if (tail=="high") { 
+    	 pvalue <- mapply(function(x,y) if(x==1){
+    	     	                             return(y/2) } else{
+    	     	                             return(1-y/2)	
+    	     	                         }, x=dir, y=p)
+    	 }
+    if (tail=="low") { 
+    	 pvalue <- mapply(function(x,y) if(x==1){
+    	     	                          return(1-y/2) } else{
+    	     	                          return(y/2)	
+    	     	                     }, x=dir, y=p)
+     }    	 
+     
+    if (tail=="abs")  pvalue <- p  
     
     edgeR.out <- list(log2FC,pvalue)
     names( edgeR.out) <- c('log2FC','pvalue')
@@ -517,12 +551,21 @@ get.DESeq2 <- function(y,l,c,name, ANOVA, tail) {
     
     p <- as.numeric(res$pvalue)
     dir <- sign(log2FC)
-    if (tail=="high" && dir == 1 )  pvalue <- pmin(1,p/2)
-    if (tail=="high" && dir == -1 )  pvalue <- pmin(1,1-p/2)
-    if (tail=="low" && dir == 1 )  pvalue <- pmin(1,1-p/2)
-    if (tail=="low" && dir == -1 )  pvalue <- pmin(1,p/2)
-    if (tail=="abs")  pvalue <- p    
-    #pvalue <-  as.numeric(res$pvalue)
+    if (tail=="high") { 
+    	  pvalue <- mapply(function(x,y) if(x==1){
+    	     	                             return(y/2) } else{
+    	     	                             return(1-y/2)	
+    	     	                         }, x=dir, y=p)
+    	 }
+    if (tail=="low") { 
+    	 pvalue <- mapply(function(x,y) if(x==1){
+    	     	                          return(1-y/2) } else{
+    	     	                          return(y/2)	
+    	     	                     }, x=dir, y=p)
+     }    	 
+     
+    if (tail=="abs")  pvalue <- p  
+    
     DESeq2.out <- list(log2FC,lfcSE,pvalue)
     names(DESeq2.out) <- c('log2FC','lfcSE','pvalue')  
   } else {     

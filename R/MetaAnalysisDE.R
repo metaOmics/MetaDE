@@ -136,9 +136,9 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
 
 ## Call the packages required 
 
-library(impute)
-library(Biobase)
-library(combinat)
+#library(impute)
+#library(Biobase)
+#library(combinat)
 
 ##Input  
 ##data: list of data matrices, genes on the rows, samples on the columns;
