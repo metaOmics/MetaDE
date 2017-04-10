@@ -195,7 +195,7 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
     full_dat<-vector(mode = "list", length = K)
     N <- n <- c()
     for(i in 1:K){
-      groupLabel <- response.list[[i]]
+      groupLabel <- as.factor(response.list[[i]])
       groupName=levels(groupLabel)  
       name <- select.group
       l<- groupLabel[groupLabel %in% name]
@@ -213,7 +213,7 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
     full_dat<-vector(mode = "list", length = K)
     N <- n <- c()
     for(i in 1:K){
-      groupLabel <- response.list[[i]]
+      groupLabel <- as.factor(response.list[[i]])
       y<-data[[i]]
       full_dat[[i]][[1]] <- y
       full_dat[[i]][[2]] <- groupLabel
@@ -228,7 +228,7 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
 		K<-length(data)
 		dat<-lbl<-list()
 		for(i in 1:K){
-			l <- response.list[[i]]
+			l <- as.factor(response.list[[i]])
 			l <- relevel(l,ref=ref.level)
 			dat[[i]]<-data[[i]]
 			lbl[[i]]<-l
@@ -268,7 +268,7 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
 		K<-length(data)
 		dat<-lbl<-list()
 		for(i in 1:K){
-       groupLabel <- response.list[[i]]
+       groupLabel <- as.factor(response.list[[i]])
        groupName=levels(groupLabel)	
        name <- select.group
        l<- groupLabel[groupLabel %in% name]
