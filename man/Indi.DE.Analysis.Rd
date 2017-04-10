@@ -6,7 +6,8 @@
 \usage{
 Indi.DE.Analysis(data, clin.data, data.type, resp.type, response,
   covariate = NULL, ind.method, select.group = NULL, ref.level = NULL,
-  asymptotic = NULL, nperm = NULL, tail = "abs", seed = 12345, ...)
+  paired = NULL, asymptotic = NULL, nperm = NULL, tail = "abs",
+  seed = 12345, ...)
 }
 \arguments{
 \item{data}{is a list of K elements, where K is the number of studies, each 
@@ -36,14 +37,16 @@ if there is association between the gene expression and outcome variable.
 must be one of "limma", "sam" for "continuous" data type and "edgeR", 
 "DESeq2" or "limmaVoom" for "discrete" data type.}
 
-\item{asymptotic}{is a logical value indicating whether asymptotic 
-distribution should be used. If FALSE, permutation will be performed.}
-
 \item{select.group:}{for two-class comparison only, specify the two groups 
 for comparison when the group factor has more than two levels.}
 
 \item{ref.level:}{for two-class/multi-class comparison only, specify the 
 reference level of the group factor.}
+
+\item{paired:}{logical value indicating whether paired design;}
+
+\item{asymptotic:}{a logical value indicating whether asymptotic 
+distribution should be used. If FALSE, permutation will be performed.}
 
 \item{nperm:}{the number of permutations. Applicable when \code{asymptotic} 
 is FALSE.}
@@ -89,11 +92,12 @@ ref.level <- "inv(16)"
 data.type <- "continuous"
 ind.method <- c('limma','limma','limma')
 resp.type <- "twoclass"
+paired <- rep(FALSE,length(data))
 ind.res <- Indi.DE.Analysis(data=data,clin.data= clin.data, 
                         data.type=data.type,resp.type = resp.type,
                         response='label',
                         ind.method=ind.method,select.group = select.group,
-                        ref.level=ref.level)
+                        ref.level=ref.level,paired=paired)
 N <- sapply(data, FUN=function(x) ncol(x))
 survival.time <- lapply(N,FUN = function(x) round(runif(x,10,2000)))
 censor.status <- lapply(N,FUN = function(x) sample(c(0,1),x,replace=TRUE) )
@@ -108,4 +112,3 @@ ind.res <- Indi.DE.Analysis(data=data,clin.data= clin.data,
                          response=c("survival","censor"),
                          ind.method=ind.method,asymptotic=TRUE)
 }
-

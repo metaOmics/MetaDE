@@ -23,4 +23,3 @@ results to determine the overall effect size directionality.
 posthoc.result <- posthoc.aw(result=meta.res)
 }
 }
-

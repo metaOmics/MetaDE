@@ -29,4 +29,3 @@ summary.posthoc.result <- summary.meta(result=posthoc.result,
                               meta.method = meta.method)
 }
 }
-

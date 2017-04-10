@@ -53,4 +53,3 @@ ks.result <- PathAnalysis(meta.p = meta.p, enrichment = "KS")
 fisher.result <- PathAnalysis(meta.p = meta.p, enrichment = "Fisher's exact")
 }
 }
-

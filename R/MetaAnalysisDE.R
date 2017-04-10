@@ -320,6 +320,7 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
           for (j in 1:ncol(temp_dat)) {
             ## obtain log2 count matrix offset by library size
             temp_dat[i,j] <- log2(temp_dat[i,j]+0.25) - log2(libsize[j])
+            #prior.count = 0.25 from cpm() default in edgeR
           }  
         }
         full_dat[[i]][[1]] <- temp_dat
@@ -349,7 +350,7 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
                               response=response, covariate = covariate,
                               ind.method= ind.method,
                               select.group = select.group,
-                              ref.level=ref.level,
+                              ref.level=ref.level,paired=paired,
                               asymptotic = asymptotic, nperm=nperm,
                               tail=tail, seed=seed)
    if (parametric) {
@@ -1106,7 +1107,7 @@ cal.ES<-function(y,l,paired=FALSE){
 		vardprime=sum(1/n)+dprime^2/(2*sum(n))			
 	}
 	result = cbind( dprime, vardprime)
-  colnames(result) = c( "dprime", "vardprime")
+    colnames(result) = c( "dprime", "vardprime")
 	rownames(result)<-rownames(y)
   result
 }
@@ -1159,9 +1160,10 @@ ind.cal.ES<-function(x,paired,nperm=NULL){
 }
 
 get.tau2 <- function(em, vm, k,  n, REM.type, threshold=10^-5, maxiter = 100) {  
-  ## em, vm, n are all matrices of G rows and K columns:
-  ## em: observed effect size, vm: variance of effect size, n: sample size
-  ## k: number of studies
+  ## em, vm are all matrices of G rows and K columns;
+  ## n is a vector of length K;
+  ## em: observed effect size, vm: variance of effect size, n: sample size;
+  ## k: number of studies;
   if (REM.type == "HS") {
     wt <- matrix(rep(n,nrow(em)),byrow=T,nrow=nrow(em),ncol=length(n))
     n_bar <- mean(n)
@@ -1170,7 +1172,7 @@ get.tau2 <- function(em, vm, k,  n, REM.type, threshold=10^-5, maxiter = 100) {
     num <- rowSums(wt*(em-em_mean)^2)
     denom <- n_sum
 
-    tau2 <- num/denom  - ((n_sum-1)/(n_sum-3)) * (4/n_bar) * (1+em_mean^2/8)
+    tau2 <- num/denom  - ((n_bar-1)/(n_bar-3)) * (4/n_bar) * (1+em_mean^2/8)
     res <- list(wt,tau2)
     names(res) <- c('weight','tau2')
     return(res)
@@ -1314,17 +1316,6 @@ get.FEM<-function(em,vm,n, pe=NULL,pv=NULL){
   return(res)
 }
 
-get.FEM2<-function(em,vm){
-  wt<-1/vm
-  mu.hat<-rowSums(wt*em)/rowSums(wt)
-  mu.var<-1/rowSums(wt)
-  z.score<-mu.hat/sqrt(mu.var)
-  z.p<-2*(1-pnorm(abs(z.score)))
-  qval<-p.adjust(z.p,method="BH")
-  res<-list(mu.hat=mu.hat,mu.var=mu.var,zval=z.score,pval=z.p,FDR=qval)
-  return(res)
-}
-
 get.REM2<-function(em,vm, n, REM.type){
   k<-ncol(em)
   tau2.res <-get.tau2(em = em ,vm = vm ,k=k, n=n, REM.type=REM.type)
@@ -1353,7 +1344,7 @@ get.REM<-function(em, vm, n, REM.type, pe=NULL,pv=NULL){
   mu.hat<-rowSums(temp.wt*em)/rowSums(temp.wt)
   mu.var<-1/rowSums(temp.wt)
   Qpval <- pchisq(Q.val, df = k - 1, lower.tail = FALSE)
-  z.score<-get.REM2(em = em ,vm = vm, n=n, REM.type=REM.type)$zval
+  z.score<-get.REM2(em = em ,vm = vm, n=n, REM.type="HO")$zval
   if(!is.null(pe)&!is.null(pv)){
     rnum<-which(apply(em,1,function(x) !any(is.na(x))))
     Z0<-matrix(get.REM2(pe,pv, n=n, REM.type=REM.type)$zval,nrow(em),

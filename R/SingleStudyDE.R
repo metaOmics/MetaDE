@@ -27,7 +27,8 @@
 ##' for comparison when the group factor has more than two levels.
 ##' @param ref.level: for two-class/multi-class comparison only, specify the 
 ##' reference level of the group factor. 
-##' @param asymptotic is a logical value indicating whether asymptotic 
+##' @param paired: logical value indicating whether paired design;
+##' @param asymptotic: a logical value indicating whether asymptotic 
 ##' distribution should be used. If FALSE, permutation will be performed. 
 ## 'For resp.type = "continuous", "survival" only.
 ##' @param nperm: the number of permutations. Applicable when \code{asymptotic} 
@@ -66,11 +67,12 @@
 ##' data.type <- "continuous"
 ##' ind.method <- c('limma','limma','limma')
 ##' resp.type <- "twoclass"
+##' paired <- rep(FALSE,length(data))
 ##' ind.res <- Indi.DE.Analysis(data=data,clin.data= clin.data, 
 ##'                         data.type=data.type,resp.type = resp.type,
 ##'                         response='label',
 ##'                         ind.method=ind.method,select.group = select.group,
-##'                         ref.level=ref.level)
+##'                         ref.level=ref.level,paired=paired)
 ##' N <- sapply(data, FUN=function(x) ncol(x))
 ##' survival.time <- lapply(N,FUN = function(x) round(runif(x,10,2000)))
 ##' censor.status <- lapply(N,FUN = function(x) sample(c(0,1),x,replace=TRUE) )
@@ -88,8 +90,9 @@
 
 Indi.DE.Analysis <- function(data, clin.data, data.type, resp.type, 
                              response,covariate=NULL,ind.method, 
-                             select.group=NULL, ref.level=NULL, asymptotic=NULL,
-                             nperm=NULL, tail="abs", seed=12345,
+                             select.group=NULL, ref.level=NULL, 
+                             paired=NULL,asymptotic=NULL,nperm=NULL, 
+                             tail="abs", seed=12345,
                              ... ) {
 
 ## Call the packages required 
@@ -114,6 +117,7 @@ set.seed(seed)
 ##"spearmanr","logrank");
 ##select.group: specify the two group names for comparison;
 ##ref.level: specify the reference level of the group factor;
+##paired: logical indicating whether paired design;
 ##asymptotic: logical whether asymptotic dist should be used;
 ##nperm: number of permutations;
 ##tail = c("low", "high", "abs");
@@ -132,7 +136,8 @@ set.seed(seed)
 ##check the individual method for the corresponding resp.type and data.type,
 ##in addition, check the consistency between resp.type and response.
 
-  check.indmethod(response.list, resp.type, data.type, ind.method, select.group, tail) 
+  check.indmethod(response.list, resp.type, data.type, ind.method, 
+                  select.group, tail, paired) 
 
 ##verify the correct specification of individual method
   ind.method<- match.arg(ind.method,c("limma","sam","limmaVoom","edgeR",
@@ -166,15 +171,15 @@ set.seed(seed)
  ANOVA<- (resp.type == "multiclass") #indicate whether ANOVA should be performed          
  ind.res<-switch(ind.method[k],
                 limma={get.limma(y=y,l=l,c=c,name=name, 
-                	               ANOVA=ANOVA,tail=tail)},
+                	               ANOVA=ANOVA,tail=tail,paired=paired[k])},
                 sam={get.sam(y=y,l=l,name=name,seed=seed,
-                	            ANOVA=ANOVA,tail=tail)},
+                	            ANOVA=ANOVA,tail=tail,paired=paired[k])},
                 limmaVoom={get.limmaVoom(y=y,l=l,c=c,name=name,
-                	         ANOVA=ANOVA,tail=tail)},
+                	         ANOVA=ANOVA,tail=tail,paired=paired[k])},
                 edgeR={get.edgeR(y=y,l=l,c=c,name=name,
-                	       ANOVA=ANOVA,tail=tail)},
+                	       ANOVA=ANOVA,tail=tail,paired=paired[k])},
                 DESeq2={get.DESeq2(y=y,l=l,c=c,name=name,
-                	    ANOVA=ANOVA,tail=tail)})
+                	    ANOVA=ANOVA,tail=tail,paired=paired[k])})
 
   pvalue<- cbind(pvalue,ind.res$pvalue) #p value
 
@@ -312,14 +317,25 @@ get.sample.label.number<-function(lbl) {
   return(list(N=N,n=n))
 }
 
-get.limma<-function(y,l,c,name,ANOVA,tail){
+get.limma<-function(y,l,c,name,ANOVA,tail, paired){
 ## y: intensity matrix, l: group label, c: clinical data, name: group name
   if(!ANOVA) {
     if(is.null(c)) {
-      design <-model.matrix(~ l)  # design matrix
+      if(paired) {
+         subject <- as.factor(rep(1:(length(l)/2),2))
+         design <-model.matrix(~ l + subject) 
+      } else{
+         design <-model.matrix(~ l)  # design matrix
+      } 
     } else {
-      lc <- data.frame(l=l,c=c)
-      design <-model.matrix(~ l + c,data=lc) # design matrix
+       if(paired) {
+          subject <- as.factor(rep(1:(length(l)/2),2))
+          lc <- data.frame(l=l,c=c,s=subject)
+          design <-model.matrix(~ l + c + s,data=lc) 
+       } else{
+          lc <- data.frame(l=l,c=c)
+          design <-model.matrix(~ l + c,data=lc) # design matrix
+       }    
     }  
     #log2FC <- rowMeans(y[,l==name[1]])-rowMeans(y[,l==name[2]]) 
     fit <-lmFit(y, design)
@@ -365,7 +381,7 @@ get.limma<-function(y,l,c,name,ANOVA,tail){
   return(limma.out)
 }
 
-get.sam<-function(y,l,name, seed, ANOVA, tail) {
+get.sam<-function(y,l,name, seed, ANOVA, tail, paired) {
 ## y: intensity matrix, l: group label, name: group name 
   options(verbose=F)
   if(!ANOVA) {
@@ -373,11 +389,11 @@ get.sam<-function(y,l,name, seed, ANOVA, tail) {
     ## prepare the sam data
     sam.data<-list(x=y,y=l, geneid= 1:nrow(y), genenames=rownames(y),logged2=T)
     ## run the sam permutation test 
-    #samr.obj<-samr(sam.data,  resp.type=ifelse (is.null(paired),
-    #                "Two class unpaired","Two class paired"), nperms=100, 
-    #                random.seed=seed)
-    samr.obj<-samr(sam.data,  resp.type="Two class unpaired", nperms=100, 
-                   random.seed=seed)
+    samr.obj<-samr(sam.data,  resp.type=ifelse(paired,
+                    "Two class paired","Two class unpaired"), nperms=100, 
+                    random.seed=seed)
+    #samr.obj<-samr(sam.data,  resp.type="Two class unpaired", nperms=100, 
+    #               random.seed=seed)
     p<- as.numeric(samr.pvalues.from.perms(samr.obj$tt, samr.obj$ttstar))
     log2FC <- as.numeric(log2(samr.obj$foldchange))
     dir <- sign(log2FC)
@@ -409,16 +425,27 @@ get.sam<-function(y,l,name, seed, ANOVA, tail) {
   return(sam.out)
 }
 
-get.limmaVoom <- function(y,l,c,name, ANOVA, tail) {
+get.limmaVoom <- function(y,l,c,name, ANOVA, tail, paired) {
 ## y: count matrix, l: group label, c: clinical data, name: group name 
   dge <- DGEList(counts=y)
   dge <- calcNormFactors(dge)  
   if(!ANOVA){
     if(is.null(c)) {
-       design <-model.matrix(~ l) # design matrix 
+      if(paired) {
+        subject <- as.factor(rep(1:(length(l)/2),2))
+        design <-model.matrix(~ l + subject) 
+      } else{
+        design <-model.matrix(~ l)  # design matrix
+      }  
     } else {
-       lc <- data.frame(l=l,c=c)
-       design <-model.matrix(~ l + c,data=lc) # design matrix
+       if(paired) {
+         subject <- as.factor(rep(1:(length(l)/2),2))
+         lc <- data.frame(l=l,c=c,s=subject)
+         design <-model.matrix(~ l + c + s,data=lc) 
+       }else{
+         lc <- data.frame(l=l,c=c)
+         design <-model.matrix(~ l + c,data=lc) # design matrix
+      }    
     }  
   v <- voom(dge,design,plot=FALSE,normalize="quantile") # voom normalization
   fit <-lmFit(v, design)
@@ -464,7 +491,7 @@ get.limmaVoom <- function(y,l,c,name, ANOVA, tail) {
   return(limmaVoom.out)
 }
 
-get.edgeR <- function(y,l,c,name, ANOVA, tail) {
+get.edgeR <- function(y,l,c,name, ANOVA, tail, paired) {
 ## y: count matrix, l: group label, c: clinical data, name: group name 
   dat <- DGEList(counts=y)
   dat <- calcNormFactors(dat)
@@ -475,10 +502,21 @@ get.edgeR <- function(y,l,c,name, ANOVA, tail) {
   
   if(!ANOVA){
     if(is.null(c)) {
-      design <-model.matrix(~ l) # design matrix
+      if(paired) {
+        subject <- as.factor(rep(1:(length(l)/2),2))
+        design <-model.matrix(~ l + subject) 
+      } else{
+        design <-model.matrix(~ l)  # design matrix
+      }  
     } else {
-      lc <- data.frame(l=l,c=c)
-      design <-model.matrix(~ l + c,data=lc) # design matrix
+       if(paired) {
+         subject <- as.factor(rep(1:(length(l)/2),2))
+         lc <- data.frame(l=l,c=c,s=subject)
+         design <-model.matrix(~ l + c + s,data=lc) 
+       }else{
+         lc <- data.frame(l=l,c=c)
+         design <-model.matrix(~ l + c,data=lc) # design matrix
+       }    
     }      
     fit <- glmFit(dat, design)
     lrt <- glmLRT(fit, coef=2)
@@ -522,19 +560,34 @@ get.edgeR <- function(y,l,c,name, ANOVA, tail) {
   return(edgeR.out)
 }
 
-get.DESeq2 <- function(y,l,c,name, ANOVA, tail) {
+get.DESeq2 <- function(y,l,c,name, ANOVA, tail, paired) {
 ## y: count matrix, l: group label, c: clinical data, name: group name 
   #library(SummarizedExperiment)  
   if(!ANOVA){   
     if(is.null(c)) {
+      if(paired) {
+        subject <- as.factor(rep(1:(length(l)/2),2))
+        design <-model.matrix(~ l + subject)  # design matrix
+        colData <- data.frame(l=l, s=subject)
+        colnames(colData) <-colnames(design)[-1]         
+      }else{
         design <-model.matrix(~ l)  # design matrix
         colData <- data.frame(l=l)
         colnames(colData) <-colnames(design)[-1] 
+      }  
     } else {
-       lc <- data.frame(l=l,c=c) 
-       design <-model.matrix(~ l + c,data=lc)  # design matrix
-       colData <- lc
-       colnames(colData) <-colnames(design)[-1] 
+       if(paired) {
+          subject <- as.factor(rep(1:(length(l)/2),2))
+          lc <- data.frame(l=l,c=c,s=subject) 
+          design <-model.matrix(~ l + c + s,data=lc)  # design matrix
+          colData <- lc
+          colnames(colData) <-colnames(design)[-1]           
+       } else{
+          lc <- data.frame(l=l,c=c) 
+          design <-model.matrix(~ l + c,data=lc)  # design matrix
+          colData <- lc
+          colnames(colData) <-colnames(design)[-1] 
+       } 
     }
       
   ddsMat <- DESeqDataSetFromMatrix(countData = y,

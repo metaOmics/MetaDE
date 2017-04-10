@@ -225,7 +225,7 @@ check.tail<-function(meta.method,tail)
 #   check individual methods and response                                       
 #-----------------------------------------------------------------------------#
 check.indmethod<-function(y, resp.type, data.type,ind.method, 
-                             select.group,tail) {  
+                             select.group,tail,paired) {  
   K<-length(y)
 for(k in 1:K) {
   if(data.type == "continuous") {
@@ -245,6 +245,10 @@ for(k in 1:K) {
   if(resp.type =="twoclass") {
     if(nlevels(as.factor(y[[k]]))!=2 && length(select.group)!=2 ) {
       stop (cat(resp.type," requires two levels ") )
+    }
+    if (is.null(paired)) {
+      stop(paste("you need to specify the logical value for 'paired' 
+               for study", k))
     }
   }     
   if(resp.type=="multiclass") {
@@ -386,8 +390,8 @@ perm.lab<-function(x,paired=FALSE){
 	New.x<-x	
 	if(paired){
 		templab<-rbinom(length(x)/2,1,0.5)
-		index.d<-which(x==1)
-		index.c<-which(x==0)
+		index.d<-which(x==levels(x)[2])
+		index.c<-which(x==levels(x)[1])
 		dx<-x[index.d]
 		cx<-x[index.c]
 		New.dx<-dx

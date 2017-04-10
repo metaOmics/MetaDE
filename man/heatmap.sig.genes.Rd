@@ -35,4 +35,3 @@ heatmap.sig.genes(meta.res, meta.method=meta.method,
 dev.off()
 }
 }
-

@@ -155,4 +155,3 @@ meta.res <- MetaDE(data=data,clin.data = clin.data,
                     paired=paired, rth=NULL,
                     REM.type=NULL,tail='abs',parametric=TRUE)
 }
-
