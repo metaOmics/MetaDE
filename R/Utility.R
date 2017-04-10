@@ -250,6 +250,11 @@ for(k in 1:K) {
       stop(paste("you need to specify the logical value for 'paired' 
                for study", k))
     }
+    
+    n<-table(factor(y[[k]]))
+    if (n[1]!=n[2]){
+      stop("The study is not paired design")
+    }
   }     
   if(resp.type=="multiclass") {
     if(nlevels(as.factor(y[[k]])) <=2) {
