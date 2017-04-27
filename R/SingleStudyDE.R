@@ -202,7 +202,8 @@ set.seed(seed)
 	 N<-c(N,nns$N) #sample size per study 
 	 n<-append(n,nns$n) #sample size per label per study
 } # end of K study for loop
-  
+
+ if(!ANOVA) { 	  
   if(is.null(names(data))) {
     colnames(log2FC) <-colnames(lfcSE)<-colnames(pvalue)<-
       paste("dataset",1:K,sep="") # naming studies
@@ -216,9 +217,8 @@ set.seed(seed)
   } else {
     rownames(log2FC) <-rownames(lfcSE)<-rownames(pvalue)<-rownames(data[[1]]) 
   }
-
-  if(!ANOVA) {
     all.res<-list(log2FC=log2FC,lfcSE=lfcSE,p=pvalue) 
+    
   } else {
     all.res<-list(p=pvalue)
   }
