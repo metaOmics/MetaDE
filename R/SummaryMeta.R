@@ -21,11 +21,10 @@ summary.meta <- function(result,meta.method,response.type) {
 	
   if (response.type!="twoclass"){
   	    summary <- data.frame(ind.p = result$ind.p,
-                          stat = result$meta.analysis$stat,
                           pval = result$meta.analysis$pval,
                           FDR = result$meta.analysis$FDR)
-    colnames(summary)[(ncol(summary)-2):(ncol(summary))] <- 
-      c("stat","pval","FDR")
+    colnames(summary)[(ncol(summary)-1):(ncol(summary))] <- 
+      c("pval","FDR")
   }	else {
   	
   if ("minMCC"%in%meta.method) {
