@@ -17,9 +17,9 @@
 ##'                               meta.method = meta.method)
 ##' }
 
-summary.meta <- function(result,meta.method) {
+summary.meta <- function(result,meta.method,response.type) {
 	
-  if (attributes(result$meta.analysis)$response.type!="twoclass"){
+  if (response.type!="twoclass"){
   	    summary <- data.frame(ind.p = result$ind.p,
                           stat = result$meta.analysis$stat,
                           pval = result$meta.analysis$pval,
