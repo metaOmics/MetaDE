@@ -26,7 +26,7 @@ summary.meta <- function(result,meta.method) {
                           FDR = result$meta.analysis$FDR)
     colnames(summary)[(ncol(summary)-2):(ncol(summary))] <- 
       c("stat","pval","FDR")
-  }	else if {
+  }	else {
   	
   if ("minMCC"%in%meta.method) {
     summary <- data.frame(stat = result$meta.analysis$stat,
