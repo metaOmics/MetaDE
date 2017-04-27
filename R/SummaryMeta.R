@@ -18,6 +18,16 @@
 ##' }
 
 summary.meta <- function(result,meta.method) {
+	
+  if (attributes(meta.res$meta.analysis)$response.type!="twoclass"){
+  	    summary <- data.frame(ind.p = result$ind.p,
+                          stat = result$meta.analysis$stat,
+                          pval = result$meta.analysis$pval,
+                          FDR = result$meta.analysis$FDR)
+    colnames(summary)[(ncol(summary)-2):(ncol(summary))] <- 
+      c("stat","pval","FDR")
+  }	else if {
+  	
   if ("minMCC"%in%meta.method) {
     summary <- data.frame(stat = result$meta.analysis$stat,
                           pval = result$meta.analysis$pval,
@@ -64,6 +74,8 @@ summary.meta <- function(result,meta.method) {
     } 
   }
   
+ }
+ 
   rownames(summary) <- rownames(result$raw.data[[1]][[1]]) 
   return(summary)
 }
