@@ -4,22 +4,27 @@
 ##' @title Function to summarize the meta-analysis results.
 ##' @param result is the output from MetaDE
 ##' @param meta.method is the meta-analysis method used in MetaDE
-
+##' @param resp.type is a character indicating the response type, 
+##' must be one of "twoclass", "multiclass", "continuous" and "survival".
 ##' @return a summary table including individual study statistics and pvalue,
 ##' meta-analysis test statistics, pvalue, FDR, AW weights etc.  
 ##' @export
 ##' @examples
 ##' \dontrun{
 ##' meta.method <- 'AW'
+##' resp.type <- "twoclass"
 ##' summary.result <- summary.meta(result=meta.res, 
-##'                               meta.method = meta.method)
+##'                               meta.method = meta.method,
+##'                               resp.type = resp.type)
+##' posthoc.result <- posthoc.aw(result=meta.res)
 ##' summary.posthoc.result <- summary.meta(result=posthoc.result, 
-##'                               meta.method = meta.method)
+##'                               meta.method = meta.method,
+##'                               resp.type = resp.type)
 ##' }
 
-summary.meta <- function(result,meta.method,response.type) {
+summary.meta <- function(result,meta.method,resp.type) {
 	
-  if (response.type!="twoclass"){
+  if (resp.type!="twoclass"){
   	    summary <- data.frame(ind.p = result$ind.p,
                           pval = result$meta.analysis$pval,
                           FDR = result$meta.analysis$FDR)

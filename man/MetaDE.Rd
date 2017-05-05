@@ -72,12 +72,12 @@ reference level of the group factor.}
 \value{
 a list with components: \cr
 \itemize{
-\item{stat}{ a matrix with rows reprenting genes. It is the statistic for 
+\item{stat:}{ a matrix with rows representing genes. It is the statistic for 
 the selected meta analysis method of combining p-values.}
-\item{pval}{ the p-value from meta analysis for each gene for the above 
+\item{pval:}{ the p-value from meta analysis for each gene for the above 
 stat.}
-\item{FDR}{ the FDR of the p-value for each gene for the above stat.}
-\item{AW.weight}{ The optimal weight assigned to each dataset/study for 
+\item{FDR:}{ the FDR of the p-value for each gene for the above stat.}
+\item{AW.weight:}{ The optimal weight assigned to each dataset/study for 
 each gene if the '\code{AW}' method was chosen.}
 }
 }
@@ -85,7 +85,8 @@ each gene if the '\code{AW}' method was chosen.}
 Main Function for Meta analysis: microarray & RNAseq 
 The \code{MetaDE} is a function to identify genes associated with the 
 response/phenoype of interest (can be either group, continuous or survival)
-by integrating multiple studies(datasets).
+by integrating multiple studies(datasets). 
+The main input consists of raw expression data.
 }
 \examples{
 data('Leukemia')

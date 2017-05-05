@@ -4,12 +4,15 @@
 \alias{summary.meta}
 \title{Function to summarize the meta-analysis results.}
 \usage{
-summary.meta(result, meta.method)
+summary.meta(result, meta.method, resp.type)
 }
 \arguments{
 \item{result}{is the output from MetaDE}
 
 \item{meta.method}{is the meta-analysis method used in MetaDE}
+
+\item{resp.type}{is a character indicating the response type, 
+must be one of "twoclass", "multiclass", "continuous" and "survival".}
 }
 \value{
 a summary table including individual study statistics and pvalue,
@@ -23,9 +26,13 @@ results from the MetaDE output.
 \examples{
 \dontrun{
 meta.method <- 'AW'
+resp.type <- "twoclass"
 summary.result <- summary.meta(result=meta.res, 
-                              meta.method = meta.method)
+                              meta.method = meta.method,
+                              resp.type = resp.type)
+posthoc.result <- posthoc.aw(result=meta.res)
 summary.posthoc.result <- summary.meta(result=posthoc.result, 
-                              meta.method = meta.method)
+                              meta.method = meta.method,
+                              resp.type = resp.type)
 }
 }

@@ -40,15 +40,15 @@
 
 ##' @return a list with components: \cr
 ##' \itemize{
-##' \item{p}{ For all types of response, the p-value of the association test for 
+##' \item{p:}{ For all types of response, the p-value of the association test for 
 ##' each gene}
-##' \item{stat}{ For "continuous" and "survival" only, the value of test 
+##' \item{stat:}{ For "continuous" and "survival" only, the value of test 
 ##' statistic for each ##' gene}
-##' \item{bp}{ For "continuous" and "survival" only, the p-value from 
-##'	\code{nperm} permutations for each gene. It will be used for the meta 
+##' \item{bp:}{ For "continuous" and "survival" only, the p-value from 
+##'	\code{nperm:} permutations for each gene. It will be used for the meta 
 ##' analysis by default. It can be NULL if you chose asymptotic results. }
-##' \item{log2FC}{ For "twoclass" only, the log2 fold change for each gene}
-##' \item{lfcSE}{ For "twoclass" only, the standard error of log2 fold change 
+##' \item{log2FC:}{ For "twoclass" only, the log2 fold change for each gene}
+##' \item{lfcSE:}{ For "twoclass" only, the standard error of log2 fold change 
 ##' for each gene}
 ##' }
 

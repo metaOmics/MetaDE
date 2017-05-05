@@ -1,7 +1,8 @@
 ##' Main Function for Meta analysis: microarray & RNAseq 
 ##' The \code{MetaDE} is a function to identify genes associated with the 
 ##' response/phenoype of interest (can be either group, continuous or survival)
-##' by integrating multiple studies(datasets).
+##' by integrating multiple studies(datasets). 
+##' The main input consists of raw expression data. 
 ##' @title Main Function for Meta DE analysis: microarray & RNAseq.  
 ##' @param data is a list of K elements, where K is the number of studies, each 
 ##' element is a microarray or RNAseq expression matrix with G rows and N 
@@ -48,12 +49,12 @@
 
 ##' @return a list with components: \cr
 ##' \itemize{
-##' \item{stat}{ a matrix with rows reprenting genes. It is the statistic for 
+##' \item{stat:}{ a matrix with rows representing genes. It is the statistic for 
 ##' the selected meta analysis method of combining p-values.}
-##' \item{pval}{ the p-value from meta analysis for each gene for the above 
+##' \item{pval:}{ the p-value from meta analysis for each gene for the above 
 ##' stat.}
-##' \item{FDR}{ the FDR of the p-value for each gene for the above stat.}
-##' \item{AW.weight}{ The optimal weight assigned to each dataset/study for 
+##' \item{FDR:}{ the FDR of the p-value for each gene for the above stat.}
+##' \item{AW.weight:}{ The optimal weight assigned to each dataset/study for 
 ##' each gene if the '\code{AW}' method was chosen.}
 ##' }
 
@@ -430,44 +431,6 @@ MetaDE.minMCC<-function(x,nperm=100)
    return(res)
 }
    
-MetaDE.pvalue <-function(x,meta.method,rth,parametric) {
-  #meta.method<-match.arg(meta.method,several.ok = TRUE)
-  check.parametric(meta.method,parametric)
-  K<-ncol(x$p)
-  if (parametric) x$bp<-NULL     
-    nm<-length(meta.method)
-    meta.res<-list(stat=NA,pval=NA,FDR=NA,AW.weight=NA)
-    meta.res$stat<-meta.res$pval<-meta.res$FDR<-matrix(NA,nrow(x$p),nm)
-  for( i in 1:nm){
-    temp<-switch(meta.method[i],
-                 maxP={get.maxP(x$p,x$bp)},minP={get.minP(x$p,x$bp)},
-                 Fisher={get.fisher(x$p,x$bp)},roP={get.roP(x$p,x$bp,rth=rth)},
-                 AW={get.AW(x$p)},
-                 Fisher.OC={get.fisher.OC(x$p,x$bp)},
-                 maxP.OC={get.maxP.OC(x$p,x$bp)},
-                 minP.OC={get.minP.OC(x$p,x$bp)},
-                 roP.OC={get.roP.OC(x$p,x$bp,rth=rth)},
-                 Stouffer={get.Stouff(x$p,x$bp)},
-                 Stouffer.OC={get.Stouff.OC(x$p,x$bp)},
-				 SR={get.SR(x$p,x$bp)},PR={get.PR(x$p,x$bp)})
-       meta.res$stat[,i]<-temp$stat
-       meta.res$pval[,i]<-temp$pval
-       meta.res$FDR[,i]<-temp$FDR
-	   if(meta.method[i]=="AW"){
-       meta.res$AW.weight<-temp$AW.weight
-	   }
-   }
-    colnames(meta.res$stat)<-colnames(meta.res$pval)<-colnames(meta.res$FDR)<-
-      meta.method
-    rownames(meta.res$stat)<-rownames(meta.res$pval)<-
-      rownames(meta.res$FDR)<-rownames(x$p)   
-	  attr(meta.res,"nstudy")<-K
-    attr(meta.res,"meta.method")<-meta.method 
-	  res<-list(meta.analysis=meta.res,ind.p=x$p)	 
-	  #class(res)<-"MetaDE.pvalue"
-    return(res)
-}
-
 MetaDE.ES<-function(x,meta.method,REM.type) {
   #meta.method<-match.arg(meta.method,c("FEM","REM"))
   K<-ncol(x$ES)
