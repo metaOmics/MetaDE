@@ -22,10 +22,14 @@
 ##' DE analysis, can be a vector of column names or NULL.
 ##' @param ind.method is a character vector to specify the method used to test 
 ##' if there is association between the gene expression and outcome variable.
-##' must be one of "limma", "sam" for "continuous" data type and "edgeR", 
-##' "DESeq2" or "limmaVoom" for "discrete" data type.
+##' For "twoclass" or "multiclass" response, must be one of "limma", "sam" for
+##' "continuous" data type and "edgeR", "DESeq2" or "limmaVoom" for "discrete" 
+##' data type. For "continuous" response, use "pearsonr" or "spearmanr". For 
+##' "survival", use "logrank". 
 ##' @param meta.method is a character to specify the Meta-analysis method 
-##' used to combine the p-values, effect sizes or ranks. 
+##' used to combine the p-values, effect sizes or ranks. Available methods include:
+##' "maxP","maxP.OC","minP","minP.OC","Fisher","Fisher.OC","AW", roP","roP.OC",
+##' "Stouffer","Stouffer.OC","SR","PR","minMCC","FEM","REM","rankProd".
 ##' @param select.group: for two-class comparison only, specify the two groups 
 ##' for comparison when the group factor has more than two levels.
 ##' @param ref.level: for two-class/multi-class comparison only, specify the 
@@ -192,6 +196,8 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
   check.parametric(meta.method, parametric) ##check if parametric is ok
   check.tail(meta.method,tail) ##check the tail 
   data<-check.exp(data)  # check the gene names for expression data
+
+## by resp.type    
   if(resp.type == "twoclass") {
     full_dat<-vector(mode = "list", length = K)
     N <- n <- c()
@@ -201,7 +207,9 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
       name <- select.group
       l<- groupLabel[groupLabel %in% name]
       l<- droplevels(l)
-      l <- relevel(l,ref=ref.level)
+      if(!is.null(ref.level)) {
+       l <- relevel(l,ref=ref.level)
+      }
       y<-data[[i]][,groupLabel %in% name]
       full_dat[[i]][[1]] <- y
       full_dat[[i]][[2]] <- l
@@ -224,15 +232,24 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
     }
   }
     
-
-  if ("minMCC"%in%meta.method) { #multiclass
+## by meta.method    
+  if ("minMCC"%in%meta.method) { 
 		K<-length(data)
 		dat<-lbl<-list()
 		for(i in 1:K){
 			l <- as.factor(response.list[[i]])
-			l <- relevel(l,ref=ref.level)
-			dat[[i]]<-data[[i]]
-			lbl[[i]]<-l
+			if(!is.null(select.group)) {
+			  dat[[i]]<-data[[i]][,l %in% select.group]
+			  lbl[[i]]<-l[l %in% select.group]
+			} else{
+			  dat[[i]]<-data[[i]]
+			  lbl[[i]]<-l
+			}
+			
+			if(!is.null(ref.level)) {
+			 l <- relevel(l,ref=ref.level)
+			}
+
 	   }    
 	  if(data.type=="continuous") {
 		   res<-get.minMCC(dat=dat,lbl=lbl,nperm=nperm)
@@ -249,7 +266,8 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
 		     dat[[i]] <- temp_dat
 		  }
 		   res<-get.minMCC(dat=dat,lbl=lbl,nperm=nperm)
-		}
+		 } 
+		
 		raw.data<- full_dat 
 		res<-list(meta.analysis=res,raw.data=raw.data)
 		attr(res$meta.analysis,"nperstudy")<- N
@@ -265,6 +283,7 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
 		     attr(res$meta.analysis,"dataset.name") <- names(data) 
 			}    
   }  # end of minMCC
+  
   if ("rankProd"%in%meta.method){ #twoclass rank-based
 		K<-length(data)
 		dat<-lbl<-list()
@@ -274,7 +293,9 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
        name <- select.group
        l<- groupLabel[groupLabel %in% name]
        l<- droplevels(l)
-       l <- relevel(l,ref=ref.level)
+       if(!is.null(ref.level)) {
+        l <- relevel(l,ref=ref.level)
+       }
        y<-data[[i]][,groupLabel %in% name]
 		   dat[[i]]<-y
 		   lbl[[i]]<-l
@@ -309,7 +330,8 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
 		     attr(res$meta.analysis,"dataset.name") <- names(data) 
 			}      
  } # end of rankPR
-  if ("FEM"%in%meta.method|"REM"%in%meta.method){ 
+  
+  if ("FEM"%in%meta.method||"REM"%in%meta.method){ 
     ## effect size model, two classes allowed only
      if(data.type=="continuous") {
        ind.res<-ind.cal.ES(full_dat,paired=paired,nperm=nperm)
@@ -344,6 +366,7 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
 		     attr(res$meta.analysis,"dataset.name") <- names(data) 
 			}  
  } # end of effect size model  
+  
   if(sum(meta.method%in%c("FEM","REM","minMCC","rankProd"))==0)  {
     ## the other p-value combination methods
     ind.res<-Indi.DE.Analysis(data=data, clin.data= clin.data, 

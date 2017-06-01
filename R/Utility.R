@@ -316,7 +316,7 @@ check.metamethod<- function(x,y, resp.type,ind.method,meta.method,rth=NULL,
   if (resp.type %in% c("continuous", "survival")) {
   	   if (meta.method %in% c("FEM","REM","minMCC","rankProd") ) {
          stop("The meta.methods of 'FEM','REM','rankProd','minMCC' are not 
-              applicable to 'continuos','survival' response") 
+              applicable to 'continuous','survival' response") 
   	   }
   } 
   
@@ -333,7 +333,7 @@ check.metamethod<- function(x,y, resp.type,ind.method,meta.method,rth=NULL,
                            meta.method=meta.method,k=i)
     }
   }
-  
+
   if (length(grep('roP',meta.method))!=0&is.null(rth)) {
     stop("You should specify rth=XXX, when you choose roP method")
   }
@@ -352,8 +352,12 @@ check.metamethod<- function(x,y, resp.type,ind.method,meta.method,rth=NULL,
   }
   
   ANOVA <- (resp.type == "multiclass")
-  if (length(grep('maxP',meta.method))==0&&ANOVA) {
+  if (length(grep('maxP',meta.method))==0&&ANOVA&&meta.method!="minMCC") {
     warning("maxP is suggested for ANOVA model")
+  }
+  
+  if (meta.method == "rankProd") {
+    warning("rankProd method is time consuming")
   }
 }
 

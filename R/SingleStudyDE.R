@@ -152,22 +152,27 @@ set.seed(seed)
   N<-n<-NULL
    for (k in 1:K) { 
   	 groupLabel <- as.factor(response.list[[k]])
-  	 groupName=levels(groupLabel)	
-  	 name <- select.group
-  	 l<- groupLabel[groupLabel %in% name]
-     l<- droplevels(l)
-     l <- relevel(l,ref=ref.level)
-     y<-data[[k]][,groupLabel %in% name]
-     if(is.null(covariate.list[[k]])) {
-         c<- NULL
-       }      
-     if(!is.null(covariate.list[[k]]) && is.vector(covariate.list[[k]]))  {
-          c <- covariate.list[[k]][groupLabel %in% name]
-       } 
-     if(!is.null(covariate.list[[k]]) && !is.vector(covariate.list[[k]])) {
-          c <- covariate.list[[k]][groupLabel %in% name,]
-      } 
-    
+  	 if(!is.null(select.group)) {
+  	   l<- groupLabel[groupLabel %in% select.group]
+  	   y<-data[[k]][,groupLabel %in% select.group]
+  	   l<- droplevels(l)
+  	   if(is.null(covariate.list[[k]])) {
+  	     c<- NULL
+  	   }      
+  	   if(!is.null(covariate.list[[k]]) && is.vector(covariate.list[[k]]))  {
+  	     c <- covariate.list[[k]][groupLabel %in% select.group]
+  	   } 
+  	   if(!is.null(covariate.list[[k]]) && !is.vector(covariate.list[[k]])) {
+  	     c <- covariate.list[[k]][groupLabel %in% select.group,]
+  	   }
+  	 } else{
+  	   l<- groupLabel
+  	   y<- data[[k]]
+  	 }
+     if(!is.null(ref.level)) {
+       l <- relevel(l,ref=ref.level)
+     } 
+
  ANOVA<- (resp.type == "multiclass") #indicate whether ANOVA should be performed          
  ind.res<-switch(ind.method[k],
                 limma={get.limma(y=y,l=l,c=c,name=name, 

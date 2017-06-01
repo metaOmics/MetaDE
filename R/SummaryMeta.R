@@ -24,7 +24,7 @@
 
 summary.meta <- function(result,meta.method,resp.type) {
 	
-  if (resp.type!="twoclass"){
+  if (resp.type!="twoclass" && meta.method != "minMCC"){
   	    summary <- data.frame(ind.p = result$ind.p,
                           pval = result$meta.analysis$pval,
                           FDR = result$meta.analysis$FDR)

@@ -34,11 +34,15 @@ DE analysis, can be a vector of column names or NULL.}
 
 \item{ind.method}{is a character vector to specify the method used to test 
 if there is association between the gene expression and outcome variable.
-must be one of "limma", "sam" for "continuous" data type and "edgeR", 
-"DESeq2" or "limmaVoom" for "discrete" data type.}
+For "twoclass" or "multiclass" response, must be one of "limma", "sam" for
+"continuous" data type and "edgeR", "DESeq2" or "limmaVoom" for "discrete" 
+data type. For "continuous" response, use "pearsonr" or "spearmanr". For 
+"survival", use "logrank".}
 
 \item{meta.method}{is a character to specify the Meta-analysis method 
-used to combine the p-values, effect sizes or ranks.}
+used to combine the p-values, effect sizes or ranks. Available methods include:
+"maxP","maxP.OC","minP","minP.OC","Fisher","Fisher.OC","AW", roP","roP.OC",
+"Stouffer","Stouffer.OC","SR","PR","minMCC","FEM","REM","rankProd".}
 
 \item{paired}{is a logical vecter of size K to indicate whether the study 
 is paired design?}
