@@ -393,7 +393,7 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
     if(is.null(mixed) && data.type=="continuous"){
     	   raw.data<- full_dat 
     } else if (is.null(mixed) && data.type=="discrete"){
-    	   for(k in 1:length(study.index)){
+    	   for(k in 1:K){
       	 if(k %in% discrete.index) {
           temp_dat <- full_dat[[k]][[1]]
           libsize <- colSums(temp_dat)
@@ -409,7 +409,7 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
        raw.data<- full_dat   
     } else {     
          discrete.index <- which(data.type=="discrete")
-        for(k in 1:length(study.index)){
+        for(k in 1:K){
       	 	if(k %in% discrete.index) {
           temp_dat <- full_dat[[k]][[1]]
           libsize <- colSums(temp_dat)
