@@ -228,11 +228,11 @@ check.indmethod<-function(y, resp.type, data.type,ind.method,
                              select.group,tail,paired) {  
   K<-length(y)
 for(k in 1:K) {
-  if(data.type == "continuous") {
+  if(data.type[k] == "continuous") {
    if(!(ind.method[k] %in%c('limma','sam',"pearsonr","spearmanr",'logrank'))) {
     stop ("Incorrect method for microarray or RNAseq FPKM")
    }
-  } else if (data.type =='discrete') {
+  } else if (data.type[k] =='discrete') {
      if(!(ind.method[k] %in%c('edgeR','DESeq2',"spearmanr",'limmaVoom') ) ) {
        stop ("Incorrect method for RNAseq count")
      } 
