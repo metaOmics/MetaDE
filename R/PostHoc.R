@@ -53,43 +53,44 @@ posthoc.aw <- function(result) {
            N<-c(N,nns$N) #sample size per study 
            n<-append(n,nns$n) #sample size per label per study
        }
-         
-       if(all(data.type=="continuous")) {
          ind.res<-ind.cal.ES(full_dat,paired=rep(FALSE,length(study.index)),
-                                   nperm=100)
-       } else if (all(data.type=="discrete")) {       
-        for(k in 1:length(study.index)){
-          temp_dat <- full_dat[[k]][[1]]
-          libsize <- colSums(temp_dat)
-         for (i in 1:nrow(temp_dat)){
-           for (j in 1:ncol(temp_dat)) {
+                                   nperm=100)         
+
+#       if(all(data.type=="continuous")) {
+#         ind.res<-ind.cal.ES(full_dat,paired=rep(FALSE,length(study.index)),
+#                                   nperm=100)
+#       } else if (all(data.type=="discrete")) {       
+#        for(k in 1:length(study.index)){
+#          temp_dat <- full_dat[[k]][[1]]
+#          libsize <- colSums(temp_dat)
+#         for (i in 1:nrow(temp_dat)){
+#           for (j in 1:ncol(temp_dat)) {
              ## obtain log2 count matrix offset by library size
-             temp_dat[i,j] <- log2(temp_dat[i,j]+0.25) - log2(libsize[j])
-            }  
-          }
-          full_dat[[k]][[1]] <- temp_dat
-        } 
-        ind.res<-ind.cal.ES(full_dat,paired=rep(FALSE,length(study.index)),
-                                 nperm=100)
-      } else {
-      	 discrete.index <- which(data.type=="discrete")
-      	 for(k in 1:length(study.index)){
-      	 	if(k %in% discrete.index) {
-          temp_dat <- full_dat[[k]][[1]]
-          libsize <- colSums(temp_dat)
-        for (i in 1:nrow(temp_dat)){
-           for (j in 1:ncol(temp_dat)) {
-             ## obtain log2 count matrix offset by library size
-             temp_dat[i,j] <- log2(temp_dat[i,j]+0.25) - log2(libsize[j])
-             }  
-            }
-          full_dat[[k]][[1]] <- temp_dat
-          }
-        } 
-        ind.res<-ind.cal.ES(full_dat,paired=rep(FALSE,length(study.index)),
-                                 nperm=100)
-      		
-      }
+#             temp_dat[i,j] <- log2(temp_dat[i,j]+0.25) - log2(libsize[j])
+#            }  
+#          }
+#          full_dat[[k]][[1]] <- temp_dat
+#        } 
+#        ind.res<-ind.cal.ES(full_dat,paired=rep(FALSE,length(study.index)),
+#                                 nperm=100)
+#      } else {
+#      	 discrete.index <- which(data.type=="discrete")
+#      	 for(k in 1:length(study.index)){
+#      	 	if(k %in% discrete.index) {
+#          temp_dat <- full_dat[[k]][[1]]
+#          libsize <- colSums(temp_dat)
+#        for (i in 1:nrow(temp_dat)){
+#           for (j in 1:ncol(temp_dat)) {
+#             ## obtain log2 count matrix offset by library size
+#             temp_dat[i,j] <- log2(temp_dat[i,j]+0.25) - log2(libsize[j])
+#             }  
+#            }
+#          full_dat[[k]][[1]] <- temp_dat
+#          }
+#        } 
+#        ind.res<-ind.cal.ES(full_dat,paired=rep(FALSE,length(study.index)),
+#                                 nperm=100)     		
+#      }
         meta.es<-MetaDE.ES(ind.res,meta.method="REM",REM.type="HO")
         out.es[w.index] <- meta.es$zval
     }       	

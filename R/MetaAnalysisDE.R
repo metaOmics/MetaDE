@@ -255,8 +255,8 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
 	  if(data.type=="continuous") {
 		   res<-get.minMCC(dat=dat,lbl=lbl,nperm=nperm)
 		 } else if (data.type=='discrete') {	  
-		  for(i in 1:K){
-		    temp_dat <- dat[[i]]
+		  for(k in 1:K){
+		    temp_dat <- dat[[k]]
 		    libsize <- colSums(temp_dat)
 		    for (i in 1:nrow(temp_dat)){
 		      for (j in 1:ncol(temp_dat)) {
@@ -264,7 +264,7 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
 		        temp_dat[i,j] <- log2(temp_dat[i,j]+0.25) - log2(libsize[j])
 		      }  
 		    }
-		     dat[[i]] <- temp_dat
+		     dat[[k]] <- temp_dat
 		  }
 		   res<-get.minMCC(dat=dat,lbl=lbl,nperm=nperm)
 		 } 
@@ -304,8 +304,8 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
 		if(data.type=="continuous") {
 	 	   res<-get.RP(dat=dat,lbl=lbl,nperm=nperm)
 		} else if (data.type=="discrete") {      
-		  for(i in 1:K){
-		    temp_dat <- dat[[i]]
+		  for(k in 1:K){
+		    temp_dat <- dat[[k]]
 		    libsize <- colSums(temp_dat)
 		    for (i in 1:nrow(temp_dat)){
 		      for (j in 1:ncol(temp_dat)) {
@@ -313,7 +313,7 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
 		        temp_dat[i,j] <- log2(temp_dat[i,j]+0.25) - log2(libsize[j])
 		      }  
 		    }
-		    dat[[i]] <- temp_dat
+		    dat[[k]] <- temp_dat
 		  }      
 		 res <-get.RP(dat=dat,lbl=lbl,nperm=nperm)
 		}
@@ -337,7 +337,7 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
      if(data.type=="continuous") {
        ind.res<-ind.cal.ES(full_dat,paired=paired,nperm=nperm)
      } else if (data.type=="discrete") {       
-      for(i in 1:K){
+      for(k in 1:K){
         temp_dat <- full_dat[[i]][[1]]
         libsize <- colSums(temp_dat)
         for (i in 1:nrow(temp_dat)){
@@ -347,7 +347,7 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
             #prior.count = 0.25 from cpm() default in edgeR
           }  
         }
-        full_dat[[i]][[1]] <- temp_dat
+        full_dat[[k]][[1]] <- temp_dat
       } 
      ind.res<-ind.cal.ES(full_dat,paired=paired,nperm=nperm)
     }
@@ -390,7 +390,41 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
     meta.res<-MetaDE.pvalue(ind.res,meta.method=meta.method,rth=rth,
                             parametric=parametric)$meta.analysis
     
-    raw.data<- full_dat 
+    if(!isTrue(mixed) && data.type=="continuous"){
+    	   raw.data<- full_dat 
+    } else if (!isTrue(mixed) && data.type=="discrete"){
+    	   for(k in 1:length(study.index)){
+      	 if(k %in% discrete.index) {
+          temp_dat <- full_dat[[k]][[1]]
+          libsize <- colSums(temp_dat)
+        for (i in 1:nrow(temp_dat)){
+           for (j in 1:ncol(temp_dat)) {
+             ## obtain log2 count matrix offset by library size
+             temp_dat[i,j] <- log2(temp_dat[i,j]+0.25) - log2(libsize[j])
+             }  
+            }
+          full_dat[[k]][[1]] <- temp_dat
+          }
+        }
+       raw.data<- full_dat   
+    } else {     
+         discrete.index <- which(data.type=="discrete")
+        for(k in 1:length(study.index)){
+      	 	if(k %in% discrete.index) {
+          temp_dat <- full_dat[[k]][[1]]
+          libsize <- colSums(temp_dat)
+        for (i in 1:nrow(temp_dat)){
+           for (j in 1:ncol(temp_dat)) {
+             ## obtain log2 count matrix offset by library size
+             temp_dat[i,j] <- log2(temp_dat[i,j]+0.25) - log2(libsize[j])
+             }  
+            }
+          full_dat[[k]][[1]] <- temp_dat
+          } 
+        }
+       raw.data<- full_dat 
+    }   
+  
     if(resp.type %in% c("twoclass") ){
      ind.stat<- ind.res$log2FC
     }
