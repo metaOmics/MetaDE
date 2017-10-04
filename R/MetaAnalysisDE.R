@@ -390,9 +390,9 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
     meta.res<-MetaDE.pvalue(ind.res,meta.method=meta.method,rth=rth,
                             parametric=parametric)$meta.analysis
     
-    if(mixed && data.type=="continuous"){
+    if(all(data.type=="continuous")){
     	   raw.data<- full_dat 
-    } else if (mixed && data.type=="discrete"){
+    } else if (all(data.type=="discrete")){
     	   for(k in 1:K){
       	 if(k %in% discrete.index) {
           temp_dat <- full_dat[[k]][[1]]
