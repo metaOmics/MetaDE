@@ -255,17 +255,10 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
 	  if(data.type=="continuous") {
 		   res<-get.minMCC(dat=dat,lbl=lbl,nperm=nperm)
 		 } else if (data.type=='discrete') {	  
-		  for(k in 1:K){
-		    temp_dat <- dat[[k]]
-		    libsize <- colSums(temp_dat)
-		    for (i in 1:nrow(temp_dat)){
-		      for (j in 1:ncol(temp_dat)) {
-            ## obtain log2 count matrix offset by library size
-		        temp_dat[i,j] <- log2(temp_dat[i,j]+0.25) - log2(libsize[j])
-		      }  
-		    }
-		     dat[[k]] <- temp_dat
-		  }
+		 for(k in 1:K){
+            temp_dat <- cpm(dat[[k]],log=T,prior.count=0.25)
+            dat[[k]] <- data.matrix(temp_dat)
+          }
 		   res<-get.minMCC(dat=dat,lbl=lbl,nperm=nperm)
 		 } 
 		
@@ -304,17 +297,10 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
 		if(data.type=="continuous") {
 	 	   res<-get.RP(dat=dat,lbl=lbl,nperm=nperm)
 		} else if (data.type=="discrete") {      
-		  for(k in 1:K){
-		    temp_dat <- dat[[k]]
-		    libsize <- colSums(temp_dat)
-		    for (i in 1:nrow(temp_dat)){
-		      for (j in 1:ncol(temp_dat)) {
-		        ## obtain log2 count matrix offset by library size
-		        temp_dat[i,j] <- log2(temp_dat[i,j]+0.25) - log2(libsize[j])
-		      }  
-		    }
-		    dat[[k]] <- temp_dat
-		  }      
+		 for(k in 1:K){
+            temp_dat <- cpm(dat[[k]],log=T,prior.count=0.25)
+            dat[[k]] <- data.matrix(temp_dat)
+          }		     
 		 res <-get.RP(dat=dat,lbl=lbl,nperm=nperm)
 		}
 		 raw.data<- full_dat 
@@ -335,20 +321,15 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
   if ("FEM"%in%meta.method||"REM"%in%meta.method){ 
     ## effect size model, two classes allowed only
      if(data.type=="continuous") {
+     	for(k in 1:K){
+           full_dat[[k]][[1]] <- data.matrix(full_dat[[k]][[1]])
+        }
        ind.res<-ind.cal.ES(full_dat,paired=paired,nperm=nperm)
      } else if (data.type=="discrete") {       
-      for(k in 1:K){
-        temp_dat <- full_dat[[i]][[1]]
-        libsize <- colSums(temp_dat)
-        for (i in 1:nrow(temp_dat)){
-          for (j in 1:ncol(temp_dat)) {
-            ## obtain log2 count matrix offset by library size
-            temp_dat[i,j] <- log2(temp_dat[i,j]+0.25) - log2(libsize[j])
-            #prior.count = 0.25 from cpm() default in edgeR
-          }  
+    	 for(k in 1:K){
+           temp_dat <- cpm(full_dat[[k]][[1]],log=T,prior.count=0.25)
+           full_dat[[k]][[1]] <- data.matrix(temp_dat)
         }
-        full_dat[[k]][[1]] <- temp_dat
-      } 
      ind.res<-ind.cal.ES(full_dat,paired=paired,nperm=nperm)
     }
      meta.res<-MetaDE.ES(ind.res,meta.method=meta.method,REM.type=REM.type)
@@ -391,36 +372,25 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
                             parametric=parametric)$meta.analysis
     
     if(all(data.type=="continuous")){
+    	  for(k in 1:K){
+    	full_dat[[k]][[1]] <- data.matrix(full_dat[[k]][[1]]) 	
+      }	  	
     	   raw.data<- full_dat 
     } else if (all(data.type=="discrete")){
     	   for(k in 1:K){
-      	 if(k %in% discrete.index) {
-          temp_dat <- full_dat[[k]][[1]]
-          libsize <- colSums(temp_dat)
-        for (i in 1:nrow(temp_dat)){
-           for (j in 1:ncol(temp_dat)) {
-             ## obtain log2 count matrix offset by library size
-             temp_dat[i,j] <- log2(temp_dat[i,j]+0.25) - log2(libsize[j])
-             }  
-            }
-          full_dat[[k]][[1]] <- temp_dat
-          }
+           temp_dat <- cpm(full_dat[[k]][[1]],log=T,prior.count=0.25)
+           full_dat[[k]][[1]] <- data.matrix(temp_dat)
         }
        raw.data<- full_dat   
     } else {     
          discrete.index <- which(data.type=="discrete")
         for(k in 1:K){
-      	 	if(k %in% discrete.index) {
-          temp_dat <- full_dat[[k]][[1]]
-          libsize <- colSums(temp_dat)
-        for (i in 1:nrow(temp_dat)){
-           for (j in 1:ncol(temp_dat)) {
-             ## obtain log2 count matrix offset by library size
-             temp_dat[i,j] <- log2(temp_dat[i,j]+0.25) - log2(libsize[j])
-             }  
-            }
-          full_dat[[k]][[1]] <- temp_dat
-          } 
+          if(k %in% discrete.index) {
+            temp_dat <- cpm(full_dat[[k]][[1]],log=T,prior.count=0.25)
+            full_dat[[k]][[1]] <- data.matrix(temp_dat)
+          } else{
+          	full_dat[[k]][[1]] <- data.matrix(full_dat[[k]][[1]])
+          }	 
         }
        raw.data<- full_dat 
     }   
