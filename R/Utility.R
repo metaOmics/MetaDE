@@ -87,11 +87,11 @@ plot.matrix<-function(mat,color="GR") {
           ylab = "", breaks=xcut)
     #axis(3,1:nc,labels=label,las=2,line=-0.5,tick=0,cex.axis=cexCol1)
     axis(3,cumsum(ni)-ni/2+0.5,labels=rep(group.name,K),las=1,line = -0.5,
-         tick=0,cex.axis=cexCol2)
+         tick=0,cex.axis=cexCol2*2,font=2)
     axis(4,nr:1,labels=(row.names(mat)), las = 2, line = -0.5, tick = 0, 
-         cex.axis = cexRow)
+         cex.axis = cexRow*2,font=2)
     axis(1,cumsum(n)-n/2+0.5,labels=dataset.name,las=1,line = -1,
-         tick=0,cex.axis=cexCol2)
+         tick=0,cex.axis=cexCol2*2,font=2)
     #---distinguish studies----#
     abline(v=cumsum(n)+0.5,lwd=2,col="white")
     #---distinguish classes----#
@@ -107,7 +107,7 @@ plot.matrix<-function(mat,color="GR") {
           }
         at[1] <- sum.pos[1] + (sum.pos[1] - 0)/2 + 0.5
         axis(2,at-0.5,labels=rev(unique(cat)),tick = 0, las=1,
-             cex.axis = cexRow+0.2)
+             cex.axis = (cexRow+0.2)*2,font=2)
         abline(h=at.line,lwd=2,col="white")
     }
     #----add legend---------------#
@@ -115,7 +115,8 @@ plot.matrix<-function(mat,color="GR") {
     image(1:(l-1),0.5,matrix(xcut[-1],nrow=l-1,ncol=1),col=mycol,breaks=xcut,
           axes=F,xlab="",ylab="")
     marcas<-(0:(l-1))+0.5
-    axis(1,marcas,round(xcut,1),tick=0.5,cex.axis=cexCol2,line=-0.5)
+    axis(1,marcas,round(xcut,1),tick=0.5,cex.axis=cexCol2*2,line=-0.5,
+         font=2)
 }
 
 #-----------------------------------------------------------#
