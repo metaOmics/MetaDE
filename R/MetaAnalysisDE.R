@@ -351,10 +351,11 @@ MetaDE<-function(data, clin.data, data.type, resp.type,
   
   if(sum(meta.method%in%c("FEM","REM","minMCC","rankProd"))==0)  {
     ## the other p-value combination methods
+   if(!is.null(mixed)){
     if(mixed==T) {
     	   data.type <- mix.type
     }
-    
+   } 
     ind.res<-Indi.DE.Analysis(data=data, clin.data= clin.data, 
                               data.type=data.type, resp.type=resp.type, 
                               response=response, covariate = covariate,
