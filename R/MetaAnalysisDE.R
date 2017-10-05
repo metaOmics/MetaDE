@@ -1082,7 +1082,7 @@ cal.ES<-function(y,l,paired=FALSE){
 		r<-rnum/rden
 		d<-t*sqrt(2*(1-r)/n[1])
 		m<-n[1]-1
-		cm = gamma(m/2)/(sqrt(m/2) * gamma((m - 1)/2))
+		cm = gamma(min(m/2, 100))/(sqrt(m/2) * gamma(min((m - 1)/2,100) ))
 		dprime=cm*d
 		vard=(2*(1-r)/n[1])*((n[1]-1)/(n[1]-3))*
           (1+n[1]*dprime^2/(2*(1-r)))-dprime^2/cm^2
@@ -1092,7 +1092,7 @@ cal.ES<-function(y,l,paired=FALSE){
 		ym<-y%*%ind%*%diag(1/n) 
 		ntilde<-1/sum(1/n)
 		m=sum(n)-2
-		cm = gamma(m/2)/(sqrt(m/2) * gamma((m - 1)/2))
+		cm = gamma(min(m/2,100))/(sqrt(m/2) * gamma(min((m - 1)/2,100) ))
 		s<-sqrt((1/(sum(n)-2)*((y^2%*%ind)%*%diag(1/(n-1))-
                              ym^2%*%diag(n/(n-1)))%*%(n-1)))
 		d<-(ym[,2]-ym[,1])/s
