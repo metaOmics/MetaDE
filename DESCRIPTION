@@ -6,7 +6,7 @@ Version: 2.2.3
 Date: 2017-05-05
 Author: Tianzhou Ma, Xingbin Wang, Jia Li and George C Tseng
 Maintainer: Tianzhou Ma <tianzhou.ma0105@gmail.com>
-Depends:
+Imports:
     survival,
     limma,
     samr,
